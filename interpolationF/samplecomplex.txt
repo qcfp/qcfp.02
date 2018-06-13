@@ -1,0 +1,21 @@
+# sample input
+# 10 points
+10
+# initial value
+0
+# step size
+1.0
+#
+#
+# now the function
+(5,1)
+(5,1)
+(5,1)
+(2,1)
+(1,1)
+(0,1)
+(0,1)
+(0,1)
+(2,1)
+(6,1)
+# that is all

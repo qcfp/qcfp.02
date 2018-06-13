@@ -1,0 +1,21 @@
+# sample input
+# 10 points
+10
+# initial value
+0
+# step size
+1.0
+#
+#
+# now the function
+5
+5
+5
+2
+1
+0
+0
+0
+2
+6
+# that is all

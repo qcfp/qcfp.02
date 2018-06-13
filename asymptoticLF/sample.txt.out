@@ -1,0 +1,31 @@
+# asymptoticLF<valT>, v. 3.0:
+# interpolationF<valT>, v. 3.0:
+# Number of samples:
+10
+# Initial argument xmin:
+0
+# Argument step size:
+1
+# The values of the function at the predefined points (N values):
+5
+5
+5
+2
+1
+0
+0
+0
+2
+6
+# End of interpolationF<valT>, v. 3.0:
+# Derivative at xmax:
+1
+# Value at xmax:
+2
+# Derivative at xmin:
+3
+# Value at xmin:
+4
+# Symmetry parameter ***0 -> ignored,  2 -> f(-t) = f(t), 3 -> f(-t) = -f(t) ***:
+0
+# End of asymptoticLF<valT>, v. 3.0

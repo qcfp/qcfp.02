@@ -1,0 +1,61 @@
+# sample input
+# real part:
+# 10 points
+10
+# initial value
+0
+# step size
+1.0
+#
+#
+# now the function
+5
+5
+5
+2
+1
+0
+0
+0
+2
+6
+# that is all for interpolationF
+# now for asymptotics:
+1
+2
+3
+4
+0
+# that is all for real
+# imaginary part
+# sample input
+# 10 points
+10
+# initial value
+0
+# step size
+1.0
+#
+#
+# now the function
+5
+5
+5
+2
+1
+0
+0
+0
+2
+6
+# that is all for interpolationF
+# now for asymptotics:
+1
+2
+3
+4
+0
+# that is all
+
+
+

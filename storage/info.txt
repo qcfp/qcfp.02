@@ -1,0 +1,9 @@
+This object provides an intertace to store and to retrieve 
+large amounts of data in the form of multidimensional arrays.
+
+Since this is just a container, it does not provide any operations 
+of data manipulation 
+
+The purpose is to save and to get back
+
+This should be the container object for vectors, matrices, and other data objects

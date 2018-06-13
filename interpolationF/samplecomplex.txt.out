@@ -1,0 +1,19 @@
+# interpolationF<valT>, v. 3.0:
+# Number of samples:
+10
+# Initial argument xmin:
+0
+# Argument step size:
+1
+# The values of the function at the predefined points (N values):
+(5,1)
+(5,1)
+(5,1)
+(2,1)
+(1,1)
+(0,1)
+(0,1)
+(0,1)
+(2,1)
+(6,1)
+# End of interpolationF<valT>, v. 3.0:

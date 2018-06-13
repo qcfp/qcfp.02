@@ -1,0 +1,6 @@
+This is non-standard project. At the moment it has empty cpp implementations
+constants.cpp
+as all information is contained in the header file
+constants.hpp
+
+In the future this may change. 

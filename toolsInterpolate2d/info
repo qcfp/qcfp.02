@@ -1,0 +1,9 @@
+this class defines a
+tool for 
+	polynomial
+	rational-function 
+	barycentric interpolation
+
+interpolation and extrapolation
+based on a vector of N value-dataset
+
