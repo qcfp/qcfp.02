@@ -1,6 +1,9 @@
 # UNIFIED MAKEFILE FOR QCFP
 # NOT USED IN contructor-excitons
 
+
+#SYSTEM=GNULINUX
+SYSTEM=WINDOWS
 MPI_COMPILE=FALSE
 
 
@@ -13,37 +16,52 @@ CCMPIOPT=-O2 -DMPIPROCESSING
 
 endif
 
+
+# FOR MACOSX AND GNULINUX
+ifeq ($(SYSTEM),GNULINUX)
 CC=llvm-g++
 #CC=g++-5
-#CCOPT=-O2
-CCOPT=--debug
-
-
-# FOR MACOSX AND GNU
+#CC=g++
+#CCOPT=-O2 -c
+CCOPT=--debug -c
 CLOPT= -lfftw3 -llapack -lblas 
-
-
 INCPATH= -I ~/usr/include 
 LIBPATH= -L ~/usr/lib 
+LIBS=-o ../aaa-lib/
+BINS=-o ../aaa-bin/
+endif
 
+# FOR WINDOWS 10 MS Visual Studio
+ifeq ($(SYSTEM),WINDOWS)
+CC=cl
+#CCOPT=/W4 /EHsc /O2 
+CCOPT=/W4 /EHsc /c
+CLOPT=
+LIBPATH=
+LIBO=/Fo
+BINO=/Fe
+LIBS=..\aaa-lib\\
+BINS=..\aaa-bin\\
+
+endif
 
 
 # general rules
 
-qcfp.$(PROJECT): $(PROJECT).o main.o depends
-	$(CC) $(LIBPATH) -o ../aaa-bin/z.$(PROJECT) ../aaa-lib/$(PROJECT).o ../aaa-lib/$(PROJECT).main.o  \
-	$(foreach val,$(DEPENDENCIES), ../aaa-lib/$(val).o)  $(CLOPT)
+qcfp.$(PROJECT): $(PROJECT).obj main.obj depends
+	$(CC) $(CLOPT) $(BINO)$(BINS)z.$(PROJECT) $(LIBS)$(PROJECT).obj $(LIBS)$(PROJECT).main.obj  \
+	$(foreach val,$(DEPENDENCIES), $(LIBS)$(val).obj) $(LIBPATH) 
 
-$(PROJECT).o: $(PROJECT).cpp $(PROJECT).hpp
-	$(CC) $(CCOPT)  $(INCPATH) -c $(PROJECT).cpp  -o ../aaa-lib/$(PROJECT).o
+$(PROJECT).obj: $(PROJECT).cpp $(PROJECT).hpp
+	$(CC) $(CCOPT) $(PROJECT).cpp $(LIBO)$(LIBS)$(PROJECT).obj $(INCPATH) 
 
-main.o: main.cpp $(PROJECT).hpp
-	$(CC) $(CCOPT)  $(INCPATH) -c main.cpp  -o ../aaa-lib/$(PROJECT).main.o
+main.obj: main.cpp $(PROJECT).hpp
+	$(CC) $(CCOPT) main.cpp  $(LIBO)$(LIBS)$(PROJECT).main.obj $(INCPATH) 
 
 depends:
-	$(foreach val,$(DEPENDENCIES), $(MAKE) $(val).o -C ../$(val) &&) echo
+	$(foreach val,$(DEPENDENCIES), $(MAKE) $(val).obj -C ../$(val) &&) echo
 
 
 
 clean:
-	rm -f ../aaa-lib/$(PROJECT)* ../aaa-bin/z.$(PROJECT)*
+	rm -f $(LIBS)$(PROJECT)* $(BINS)z.$(PROJECT)*

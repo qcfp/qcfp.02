@@ -32,6 +32,7 @@ int toolsIO::ReadWholeFile(std::string name,std::stringstream& strstr,int flag)
                     strstr<<str<<"\n";                    
             }
         }
+    return 0;
 }
 
 int toolsIO::ReadWholeFile(std::string name,std::stringstream& strstr)
