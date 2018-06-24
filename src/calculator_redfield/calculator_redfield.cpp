@@ -669,17 +669,17 @@ calculator_redfield::GetRelaxationSuperoperatorLindblad1(int block)
     
 	// calculating supermatrix Zabcd - the Lindblad correlation supermatrix
         // from Redfield-like relations
-    storage<double> zabcd(4);
+    storage<complexv> zabcd(4);
     zabcd.Allocate(num,num,num,num);
 
 // calulcating autocorrelations
     for(int ia = 0; ia<num; ia++)
-//        for(int ib = 0; ib<num; ib++)
+        for(int ib = 0; ib<num; ib++)
             for(int ic = 0; ic<num; ic++)
-//                for(int id = 0; id<num; id++)
+                for(int id = 0; id<num; id++)
         {
-       		int ib = ia;
- 		int id = ic;
+//       		int ib = ia;
+// 		int id = ic;
             complexv value1 = 0.0;
             complexv value2 = 0.0;
 		double omegaij;
@@ -694,7 +694,7 @@ calculator_redfield::GetRelaxationSuperoperatorLindblad1(int block)
 		//omegaij = evals.data1D[ic]-evals.data1D[ia] -reorganizations.data2D[ic][ic] + reorganizations.data2D[ia][ia];
 		value2 += Mijkl.data5D[id][ib][ia][ic][iosc]*mfun.data1D[iosc].Get(omegaij);
 	    }
-            zabcd.data4D[ib][id][ia][ic] = (value1.conjugate()+value2).real();
+            zabcd.data4D[ib][id][ia][ic] = value1.conjugate()+value2;
 
 
 			//cout<<"autocorrelation: "<<ib<<" "<<id<<" "<<ia<<" "<<ic<<" "<<zabcd.data4D[ib][id][ia][ic]<<"\n";
