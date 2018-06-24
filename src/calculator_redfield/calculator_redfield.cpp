@@ -690,7 +690,7 @@ calculator_redfield::GetRelaxationSuperoperatorLindblad1(int block)
 		//omegaij = evals.data1D[id]-evals.data1D[ib] -reorganizations.data2D[id][id] + reorganizations.data2D[ib][ib];
 		value1 += Mijkl.data5D[id][ib][ia][ic][iosc]*mfun.data1D[iosc].Get(omegaij);
                 
-		omegaij = evals.data1D[ic]-evals.data1D[ib];
+		omegaij = evals.data1D[ic]-evals.data1D[ia];
 		//omegaij = evals.data1D[ic]-evals.data1D[ia] -reorganizations.data2D[ic][ic] + reorganizations.data2D[ia][ia];
 		value2 += Mijkl.data5D[id][ib][ia][ic][iosc]*mfun.data1D[iosc].Get(omegaij);
 	    }
@@ -700,15 +700,17 @@ calculator_redfield::GetRelaxationSuperoperatorLindblad1(int block)
 			//cout<<"autocorrelation: "<<ib<<" "<<id<<" "<<ia<<" "<<ic<<" "<<zabcd.data4D[ib][id][ia][ic]<<"\n";
 
         }
-// calulcating correlations
-    for(int ia = 0; ia<num; ia++)
-        for(int ib = 0; ib<num; ib++)
-            for(int ic = 0; ic<num; ic++)
-                for(int id = 0; id<num; id++)
-      		if(ib != ia ||  id != ic)
-		{
-	            zabcd.data4D[ib][id][ia][ic] = sqrt(zabcd.data4D[ib][id][ib][id]*zabcd.data4D[ia][ic][ia][ic]);
-		}
+
+
+//  // calulcating correlations
+//    for(int ia = 0; ia<num; ia++)
+//        for(int ib = 0; ib<num; ib++)
+//            for(int ic = 0; ic<num; ic++)
+//                for(int id = 0; id<num; id++)
+//      		if(ib != ia ||  id != ic)
+//		{
+//	            zabcd.data4D[ib][id][ia][ic] = sqrt(zabcd.data4D[ib][id][ib][id]*zabcd.data4D[ia][ic][ia][ic]);
+//		}
 
     
 	// calculating relaxation supermatrix from the Lindblad correlation supermatrix
