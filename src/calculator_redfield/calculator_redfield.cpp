@@ -749,21 +749,10 @@ calculator_redfield::GetRelaxationSuperoperatorLindblad1(int block)
 void calculator_redfield::AddMijkl(storage<double>& iM)
 {
 	if(iM.CheckDimension() == 5)
-        {
-//            int s5,s4,s3,s2,s1;
-//            iM.GetSize(s5,s4,s3,s2,s1);
-//            Mijkl.Delete();
-//            Mijkl.Allocate(s5,s4,s3,s2,s1);
-//            for(int i5=0;i5<s5;i5++)
-//            for(int i4=0;i4<s4;i4++)
-//            for(int i3=0;i3<s3;i3++)
-//            for(int i2=0;i2<s2;i2++)
-//            for(int i1=0;i1<s1;i1++)
-//		Mijkl.data5D[i5][i4][i3][i2][i1] = iM.data5D[i5][i4][i3][i2][i1];
-
+    {
 		Mijkl = iM;
 	}
-        else
+    else
 	{
 		cout<<"Error: calculator_redfield::AddMijkl wrong dimensionality of M\n";
 	}
