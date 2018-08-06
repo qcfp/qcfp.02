@@ -71,7 +71,20 @@ public:
         // direct simulation routines
         void SetCurrentDM(storage<complexv>& imtr);
         
+        //************************
         // nonmarkovian tools:
+
+        // excitonic propagator when separately using cfun
+        void ConvoluteCfun(storage<complexv>& der);
+        void ConvoluteGen(storage<complexv>& der);
+        storage<asymptoticLF_complexv> DMMcontinous;
+        double DMMcontinousInternalTimeStep;
+        int    DMMcontinousInternalTimeNump;
+        storage<complexv> Propagate(storage<double>& times);
+
+
+
+        // returns the whole history
         storage<complexv> GetHistory()
         {
             return dmatrixT;
@@ -96,10 +109,16 @@ public:
                 memcpy(dmatrixT.data2D[0],arr.data1D,ne*sizeof(complexv));
         }
         
+
+        //***********************
+        // generic functions
         storage<complexv>  PropagateDM(storage<double>& times);
 
-	void SetDeltaDM(int& ie,int &ig);
-	void SetBlock(int iblock);
+        // sets the "delta" initial condition on a density matrix
+	    void SetDeltaDM(int& ie,int &ig);
+
+        // specifies the block of the excitonic density matrix
+	    void SetBlock(int iblock);
 
 public:
     
@@ -108,7 +127,9 @@ public:
     int numF;
     
     int flagMarkovian;
+    int flagMemoryWithCfun;
     int flagModred;
+    int flagNonsecular;
     
     double meanEg;
     double meanEe;
@@ -119,14 +140,14 @@ public:
  
     // resulting relaxation properties
     int superoperatorReady;
-    storage<complexv> superoperatorSG; // secular markovian
-    storage<double> superoperatorSP; // secular markovian
-    storage<complexv> superoperatorM; // markovian
-    storage<complexv> superoperatorR; // non-markovian
-    storage<double> energiesReorg;
+    storage<complexv> superoperatorSG; // secular markovian dephasings
+    storage<double> superoperatorSP; // secular markovian populations
+    storage<complexv> superoperatorM; // markovian full
+    storage<complexv> superoperatorR; // non-markovian with memory
+    storage<double> energiesReorg; // reorganization energies
     
     
-    // redfield-rate calculator
+    // redfield-type calculator for excitons
 public:     calculator_redfield* calcR;
     
     

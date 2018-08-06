@@ -56,10 +56,9 @@ public:
     void Update( storage<complexv>& der, double timestep);
     
     // this function calculates derivatives when kernel is given
-    void ConvoluteGen(storage<complexv>& der);
     void Convolute(storage<complexv>& der);
-    void ConvoluteCfun(storage<complexv>& der);
 
+    // this function makes the next step when derivatives are given
     storage<complexv> Propagate(storage<double>& times);
     
 
@@ -87,6 +86,8 @@ public:
     //history matrix 1
     storage<complexv>* DMM;
     
+    // notice that blocks are not used with cfun.... not clear if they make any use
+
     // block 1:
     storage<complexv>* kernel1;
     storage<double> omegas_memory1;
@@ -101,11 +102,6 @@ public:
     double manifold0End;
     double manifold1End;
     double manifold2End;
-
-    int flag_fullkernel;
-
-    storage<asymptoticLF_complexv> cfun; // A set of correlation functions
-
 };
 
 

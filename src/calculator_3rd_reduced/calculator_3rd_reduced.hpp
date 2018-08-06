@@ -293,7 +293,7 @@ calculator_3rd_reduced<Type>::LaunchGeneric
         if(prop00 == 0)
         {
             prop00 = new Type(*this);
-	    	prop00->calcR->nonsecular = nonsecular;
+	    	prop00->flagNonsecular = nonsecular;
             prop00->flagMarkovian=markovian;
             prop00->calcR->flagLindblad = lindblad;
             prop00->SetBlock(0);
@@ -302,7 +302,7 @@ calculator_3rd_reduced<Type>::LaunchGeneric
         if(prop10 == 0)
         {
             prop10 = new Type(*this);
-	    	prop10->calcR->nonsecular = nonsecular;
+	    	prop10->flagNonsecular = nonsecular;
             prop10->flagMarkovian=markovian;
             prop10->calcR->flagLindblad = lindblad;
             prop10->SetBlock(10);
@@ -431,7 +431,7 @@ calculator_3rd_reduced<Type>::LaunchGeneric
         if(prop11 == 0)
 	{
             prop11 = new Type(*this);
-	    	prop11->calcR->nonsecular = nonsecular;
+	    	prop11->flagNonsecular = nonsecular;
 		prop11->flagMarkovian=markovian;
 		prop11->calcR->flagLindblad = lindblad;
 		prop11->SetBlock(11);
@@ -439,7 +439,7 @@ calculator_3rd_reduced<Type>::LaunchGeneric
         if(prop10 == 0)
 	{
             prop10 = new Type(*this);
-	    	prop10->calcR->nonsecular = nonsecular;
+	    	prop10->flagNonsecular = nonsecular;
 		prop10->flagMarkovian=markovian;
 		prop10->calcR->flagLindblad = lindblad;
 		prop10->SetBlock(10);
@@ -534,7 +534,7 @@ calculator_3rd_reduced<Type>::LaunchGeneric
         if(prop10 == 0)
 	{
             prop10 = new Type(*this);
-	    	prop10->calcR->nonsecular = nonsecular;
+	    	prop10->flagNonsecular = nonsecular;
 		prop10->flagMarkovian=markovian;
 		prop10->calcR->flagLindblad = lindblad;
 		prop10->SetBlock(10);
@@ -542,7 +542,7 @@ calculator_3rd_reduced<Type>::LaunchGeneric
         if(prop11 == 0)
 	{
             prop11 = new Type(*this);
-	    	prop11->calcR->nonsecular = nonsecular;
+	    	prop11->flagNonsecular = nonsecular;
 		prop11->flagMarkovian=markovian;
 		prop11->calcR->flagLindblad = lindblad;
 		prop11->SetBlock(11);
@@ -550,7 +550,7 @@ calculator_3rd_reduced<Type>::LaunchGeneric
         if(prop21 == 0)
 	{
             prop21 = new Type(*this);
-	    	prop21->calcR->nonsecular = nonsecular;
+	    	prop21->flagNonsecular = nonsecular;
 		prop21->flagMarkovian=markovian;
 		prop21->calcR->flagLindblad = lindblad;
 		prop21->SetBlock(21);
@@ -640,7 +640,7 @@ calculator_3rd_reduced<Type>::LaunchGeneric
         if(prop00 == 0)
 	{
             prop00 = new Type(*this);
-	    	prop00->calcR->nonsecular = nonsecular;
+	    	prop00->flagNonsecular = nonsecular;
 		prop00->flagMarkovian=markovian;
 		prop00->calcR->flagLindblad = lindblad;
 		prop00->SetBlock(0);
@@ -649,7 +649,7 @@ calculator_3rd_reduced<Type>::LaunchGeneric
         if(prop10 == 0)
 	{
             prop10 = new Type(*this);
-	    	prop10->calcR->nonsecular = nonsecular;
+	    	prop10->flagNonsecular = nonsecular;
 		prop10->flagMarkovian=markovian;
 		prop10->calcR->flagLindblad = lindblad;
 		prop10->SetBlock(10);
@@ -741,7 +741,7 @@ calculator_3rd_reduced<Type>::LaunchGeneric
         if(prop10 == 0)
 	{
             prop10 = new Type(*this);
-	    	prop10->calcR->nonsecular = nonsecular;
+	    	prop10->flagNonsecular = nonsecular;
 		prop10->flagMarkovian=markovian;
 		prop10->calcR->flagLindblad = lindblad;
 		prop10->SetBlock(10);
@@ -749,7 +749,7 @@ calculator_3rd_reduced<Type>::LaunchGeneric
         if(prop11 == 0)
 	{
             prop11 = new Type(*this);
-	    	prop11->calcR->nonsecular = nonsecular;
+	    	prop11->flagNonsecular = nonsecular;
 		prop11->flagMarkovian=markovian;
 		prop11->calcR->flagLindblad = lindblad;
 		prop11->SetBlock(11);
@@ -843,7 +843,7 @@ calculator_3rd_reduced<Type>::LaunchGeneric
         if(prop10 == 0)
 	{
             prop10 = new Type(*this);
-	    	prop10->calcR->nonsecular = nonsecular;
+	    	prop10->flagNonsecular = nonsecular;
 		prop10->flagMarkovian=markovian;
 		prop10->calcR->flagLindblad = lindblad;
 		prop10->SetBlock(10);
@@ -851,7 +851,7 @@ calculator_3rd_reduced<Type>::LaunchGeneric
         if(prop11 == 0)
 	{
             prop11 = new Type(*this);
-	    	prop11->calcR->nonsecular = nonsecular;
+	    	prop11->flagNonsecular = nonsecular;
 		prop11->flagMarkovian=markovian;
 		prop11->calcR->flagLindblad = lindblad;
 		prop11->SetBlock(11);
@@ -859,7 +859,7 @@ calculator_3rd_reduced<Type>::LaunchGeneric
         if(prop21 == 0)
 	{
             prop21 = new Type(*this);
-	    	prop21->calcR->nonsecular = nonsecular;
+	    	prop21->flagNonsecular = nonsecular;
 		prop21->flagMarkovian=markovian;
 		prop21->calcR->flagLindblad = lindblad;
 		prop21->SetBlock(21);
@@ -949,7 +949,7 @@ calculator_3rd_reduced<Type>::LaunchGeneric
         if(prop10 == 0)
 	{
             prop10 = new Type(*this);
-	    	prop10->calcR->nonsecular = nonsecular;
+	    	prop10->flagNonsecular = nonsecular;
 		prop10->flagMarkovian=markovian;
 		prop10->calcR->flagLindblad = lindblad;
 		prop10->SetBlock(10);
@@ -957,7 +957,7 @@ calculator_3rd_reduced<Type>::LaunchGeneric
         if(prop20 == 0)
 	{
             prop20 = new Type(*this);
-	    	prop20->calcR->nonsecular = nonsecular;
+	    	prop20->flagNonsecular = nonsecular;
 		prop20->flagMarkovian=markovian;
 		prop20->calcR->flagLindblad = lindblad;
 		prop20->SetBlock(20);
@@ -1048,7 +1048,7 @@ calculator_3rd_reduced<Type>::LaunchGeneric
         if(prop10 == 0)
 	{
             prop10 = new Type(*this);
-	    	prop10->calcR->nonsecular = nonsecular;
+	    	prop10->flagNonsecular = nonsecular;
 		prop10->flagMarkovian=markovian;
 		prop10->calcR->flagLindblad = lindblad;
 		prop10->SetBlock(10);
@@ -1056,7 +1056,7 @@ calculator_3rd_reduced<Type>::LaunchGeneric
         if(prop20 == 0)
 	{
             prop20 = new Type(*this);
-	    	prop20->calcR->nonsecular = nonsecular;
+	    	prop20->flagNonsecular = nonsecular;
 		prop20->flagMarkovian=markovian;
 		prop20->calcR->flagLindblad = lindblad;
 		prop20->SetBlock(20);
@@ -1064,7 +1064,7 @@ calculator_3rd_reduced<Type>::LaunchGeneric
         if(prop21 == 0)
 	{
             prop21 = new Type(*this);
-	    	prop21->calcR->nonsecular = nonsecular;
+	    	prop21->flagNonsecular = nonsecular;
 		prop21->flagMarkovian=markovian;
 		prop21->calcR->flagLindblad = lindblad;
 		prop21->SetBlock(21);

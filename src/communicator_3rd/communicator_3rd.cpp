@@ -766,6 +766,8 @@ void communicator_3rd::Setup()
 
     transport = 0; // turned off so far
     transportstep = 1.0;
+    propagationparameterStep = 1.0;
+    propagationparameterNump = 0;
 
     outputstring =  "";
 
@@ -910,6 +912,8 @@ void communicator_3rd::AddTransport(storage<double>& iratesG,storage<double>& ir
     ratese = iratesE;
     transport = 1;
     transportstep = tstep;
+    propagationparameterStep = tstep;
+    propagationparameterNump = 0;
 }
 
 
@@ -1389,8 +1393,6 @@ void communicator_3rd::ReadExperiment3rd(ifstream& ifs)
         naturallinewidth = arr.data2D[0][0];
 	}
 
-
-    
 }
 
 
@@ -1889,6 +1891,24 @@ void communicator_3rd::ReadBath(ifstream& ifs)
     }
 
 
+
+	if(tio.LookUpAndReadSquareMatrix<double>(
+		"InternalPropagationTimeStep:",
+		"Reading the internal propagation timestep\n", 
+		1,1, arr,inputfile.str()))
+	{
+        propagationparameterStep = arr.data2D[0][0];
+	}
+
+
+	if(tio.LookUpAndReadSquareMatrix<int>(
+		"InternalPropagationTimeNump:",
+		"Reading the internal propagation time points number\n", 
+		1,1, iri,inputfile.str()))
+	{
+        propagationparameterNump = iri.data2D[0][0];
+	}
+    
 }
 
 
@@ -1957,7 +1977,7 @@ int communicator_3rd::LookUpAndReadBathSpectraldensities(string keyword,string l
                 ifsl.close();
 
                 // making backup
-                spdf.data1D[ind].SaveF(fstr);
+                //spdf.data1D[ind].SaveF(fstr);
             }
             spd.SetSD(spdf.data1D[ind]);
         }
@@ -1978,7 +1998,7 @@ int communicator_3rd::LookUpAndReadBathSpectraldensities(string keyword,string l
                 mfun.data1D[ind] = spd.GetMf();// the whole function is returned
 
                 // making backup
-                mfun.data1D[ind].SaveF(fstr);
+                //mfun.data1D[ind].SaveF(fstr);
             }
         }
         if(true)
@@ -1993,11 +2013,11 @@ int communicator_3rd::LookUpAndReadBathSpectraldensities(string keyword,string l
             }
             else
             {
-                cout<<"# Making G function\n";
+                cout<<"# Making G function\n";
                 // making backup
                 gfun.data1D[ind] = spd.GetGf();// the whole function is returned
                 // making backup
-                gfun.data1D[ind].SaveF(fstr);
+                //gfun.data1D[ind].SaveF(fstr);
             }
         }
         if(true)
@@ -2012,11 +2032,11 @@ int communicator_3rd::LookUpAndReadBathSpectraldensities(string keyword,string l
             }
             else
             {
-                cout<<"# Making C function\n";
+                cout<<"# Making C function\n";
                 // making backup
                 cfun.data1D[ind] = spd.GetCf();// the whole function is returned
                 // making backup
-                cfun.data1D[ind].SaveF(fstr);
+                //cfun.data1D[ind].SaveF(fstr);
             }
         }
         cout<<"Done processing file: "<<str<<"\n";

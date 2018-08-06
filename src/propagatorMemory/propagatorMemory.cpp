@@ -29,8 +29,6 @@ propagatorMemory::propagatorMemory()
     manifold1End=1e99;
     manifold2End=1e99;
 
-    flag_fullkernel = 1;
-    
 }
 
 propagatorMemory::~propagatorMemory()
@@ -48,7 +46,6 @@ propagatorMemory::~propagatorMemory()
         omegas_memory = iomegas_memory;
         DMM = &iDMM;
         timesinternal = itimesinternal;
-        flag_fullkernel = 1;
         
         int timeN = timesinternal.GetSize();
         manifold0End = timesinternal.data1D[timeN-1]-constants::smallepsilon;
@@ -136,13 +133,13 @@ void propagatorMemory::Convolute(
         
         for(int indt=0;indt<timeN; indt++)
         {
-            // notice: time goes in reverse direction
-            double time = timesinternal.data1D[indt];
+            // 
+            double time = timestep*indt;
             int dimension1;
             int dimension2;
 
             // convoluting in the same manifold
-            if(time > manifold0End)// here one must include the small parameter
+            if((timeini-time) > manifold0End)// here one must include the small parameter
             {
                 //DMM->GetSize(itemp,dimension);
 
@@ -151,12 +148,12 @@ void propagatorMemory::Convolute(
                 {
                     double omega = omegas_memory.data1D[indr];
                     derdata1Dindl += kernel->data3D[indt][indl][indr]
-                        *exp(coni*(omegalxtimel-omega*time))
+                        *exp(coni*(omegalxtimel-omega*(timeini-time)))
                         *DMM->data2D[indt0][indr]*timestep;
                 }
                 indt0++;
             }
-            else if(time > manifold1End)
+            else if((timeini-time) > manifold1End)
             {
                 DMM1->GetSize(itemp,dimension1);
                 // convolution with previous manifold
@@ -164,19 +161,21 @@ void propagatorMemory::Convolute(
                 {
                     double omega = omegas_memory1.data1D[indr];
                     derdata1Dindl += kernel1->data3D[indt][indl][indr]
-                        *exp(coni*(omegalxtimel-omega*time))
+                        *exp(coni*(omegalxtimel-omega*(timeini-time)))
                         *DMM1->data2D[indt1][indr]*timestep;
                 }
                 indt1++;
             }
-            else if(time > manifold2End)
+            else if((timeini-time) > manifold2End)
             {
                 DMM2->GetSize(itemp,dimension2);
                 // convolution with even earlier manifold
                 for(int indr=0;indr<dimension2; indr++)
                 {
                     double omega = omegas_memory2.data1D[indr];
-                    derdata1Dindl += kernel2->data3D[indt][indl][indr]*exp(coni*(omegalxtimel-omega*time))*DMM2->data2D[indt2][indr]*timestep;
+                    derdata1Dindl += kernel2->data3D[indt][indl][indr]
+                        *exp(coni*(omegalxtimel-omega*(timeini-time)))
+                        *DMM2->data2D[indt2][indr]*timestep;
                 }
                 indt2++;
             }            
@@ -188,95 +187,6 @@ void propagatorMemory::Convolute(
 // this function calculates derivatives when kernel is given
 // zero index is the present time,
 // index 1 of the kernel and of the variable is the history index
-void propagatorMemory::ConvoluteGen(
-    storage<complexv>& der  // current derivative values
-)
-{
-    if(flag_fullkernel == 1)
-        Convolute(der);  // current derivative values
-    else
-        ConvoluteCfun(der);
-}
-
-void propagatorMemory::ConvoluteCfun(
-    storage<complexv>& der  // current derivative values
-)
-{
-    double timestep = timesinternal.data1D[0]-timesinternal.data1D[1];
-    int timeN = timesinternal.GetSize();
-    double timeini = timesinternal.data1D[0];
-    int itemp,dimension;
-    DMM->GetSize(itemp,dimension);
-    int numbo = cfun.GetSize();
-    
-    // integration 
-    for(int indl=0;indl<dimension; indl++)
-    {
-        double omegalxtimel = omegas_memory.data1D[indl]*timeini;
-        complexv& derdata1Dindl = der.data1D[indl];
-        derdata1Dindl=0.0;
-        
-        int indt1=0;
-        int indt2=0;
-        int indt0=0;
-        
-        for(int indt=0;indt<timeN; indt++)
-        {
-            // notice: time goes in reverse direction
-            double time = timesinternal.data1D[indt];
-            int dimension1;
-            int dimension2;            
-            
-            // convoluting in the same manifold
-            if(time > manifold0End)// here one must include the small parameter
-            {
-                // convolution with itself
-                for(int indb=0;indb<numbo; indb++)
-                for(int indr=0;indr<dimension; indr++)
-                {
-                    double omega = omegas_memory.data1D[indr];
-                    derdata1Dindl += kernel->data3D[indb][indl][indr]
-                        *cfun.data1D[indb].Get(timeini-time)
-                        *exp(coni*(omegalxtimel-omega*time))
-                        *DMM->data2D[indt0][indr]*timestep;
-                }
-                indt0++;
-            }
-            else if(time > manifold1End)
-            {
-                DMM1->GetSize(itemp,dimension1);
-                // convolution with previous manifold
-                for(int indb=0;indb<numbo; indb++)
-                for(int indr=0;indr<dimension1; indr++)
-                {
-                    double omega = omegas_memory1.data1D[indr];
-                    derdata1Dindl += kernel1->data3D[indb][indl][indr]
-                        *cfun.data1D[indb].Get(timeini-time)
-                        *exp(coni*(omegalxtimel-omega*time))
-                        *DMM1->data2D[indt1][indr]*timestep;
-                }
-                indt1++;
-            }
-            else if(time > manifold2End)
-            {
-                DMM2->GetSize(itemp,dimension2);
-                // convolution with even earlier manifold
-                for(int indb=0;indb<numbo; indb++)
-                for(int indr=0;indr<dimension2; indr++)
-                {
-                    double omega = omegas_memory2.data1D[indr];
-                    derdata1Dindl += kernel2->data3D[indb][indl][indr]
-                        *cfun.data1D[indb].Get(timeini-time)
-                        *exp(coni*(omegalxtimel-omega*time))
-                        *DMM2->data2D[indt2][indr]*timestep;
-                }
-                
-                indt2++;
-            }
-            
-        }
-    }
-}
 
 // propagates DMM with respect to itself and history DMM1 and DMM2
 storage<complexv> propagatorMemory::Propagate(storage<double>& times)

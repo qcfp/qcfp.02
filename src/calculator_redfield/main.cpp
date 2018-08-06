@@ -18,7 +18,6 @@ using std::ofstream;
 int main(int argc, const char * argv[])
 {
     toolsIO tio;
-    communicator_3rd reader;
     int numL, numR, shL, shR, iblock;
 
     if (argc!=3)
@@ -38,6 +37,7 @@ int main(int argc, const char * argv[])
         cout<<"Error: input file cannot be read\n";
 	return 0;
     }
+    communicator_3rd reader;
     tio.ReadWholeFile(ifilename,reader.inputfile,1);
 
     tio.StreamSkipTrailers(istr);
@@ -58,7 +58,7 @@ int main(int argc, const char * argv[])
     tio.StreamSkipTrailers(&istr);
     getline(istr,str);
     tio.StreamSkipTrailers(str);
-    reader.experiment_complexity = str;
+    keyword = str;
     cout<<"Got: "<<str<<"\n";
 
 	storage<double> arr(2);
@@ -84,7 +84,7 @@ int main(int argc, const char * argv[])
 	shR = 0;
       reader.band = 0;
     }
-    if(iblock==10)
+    else if(iblock==10)
     {
       numL = reader.numE;
       numR = 1;
@@ -92,7 +92,7 @@ int main(int argc, const char * argv[])
 	shR = 0;
       reader.band = 1;
     }
-    if(iblock==20)
+    else if(iblock==20)
     {
       numL = reader.numF;
       numR = 1;
@@ -100,7 +100,7 @@ int main(int argc, const char * argv[])
 	shR = 0;
       reader.band = 2;
     }
-    if(iblock==11)
+    else if(iblock==11)
     {
       numL = reader.numE;
       numR = reader.numE;
@@ -108,7 +108,7 @@ int main(int argc, const char * argv[])
 	shR = 1;
       reader.band = 1;
     }
-    if(iblock==21)
+    else if(iblock==21)
     {
       numL = reader.numF;
       numR = reader.numE;
@@ -116,7 +116,7 @@ int main(int argc, const char * argv[])
 	shR = 1;
       reader.band = 2;
     }
-    if(iblock==22)
+    else if(iblock==22)
     {
       numL = reader.numF;
       numR = reader.numE;
@@ -134,12 +134,12 @@ int main(int argc, const char * argv[])
 ////////////////////////////////////////////////////////////////////
 
     std::size_t found;
-    found = reader.experiment_complexity.find("Secular");
-    if(found!=std::string::npos)
-	reader.nonsecular = 0;
-    found = reader.experiment_complexity.find("NonSecular");
-    if(found!=std::string::npos)
-	reader.nonsecular = 1;
+//    found = reader.experiment_complexity.find("Secular");
+//    if(found!=std::string::npos)
+//	reader.nonsecular = 0;
+//    found = reader.experiment_complexity.find("NonSecular");
+//    if(found!=std::string::npos)
+//	reader.nonsecular = 1;
 
     reader.MakeESSystem();
 
@@ -151,14 +151,39 @@ int main(int argc, const char * argv[])
     //pE.SetMarkovian(true);
 
 	int flagMarkovian = 1;
+    int flagNonsecular = 0;
+    int flagLindblad = 0;
+    int flagModred = 0;
     
-    found = reader.experiment_complexity.find("Markovian");
-    if(found!=std::string::npos)
-	flagMarkovian = 1;
+    //found = reader.experiment_complexity.find("Markovian");
+    //if(found!=std::string::npos)
+	//flagMarkovian = 1;
 
-    found = reader.experiment_complexity.find("NonMarkovian");
-    if(found!=std::string::npos)
+    found = keyword.find("NonMarkovian");
+    if(found!=std::string::npos){
 	flagMarkovian = 0;
+    flagNonsecular=1;
+    }
+
+    found = keyword.find("NonSecular");
+    if(found!=std::string::npos){
+	flagNonsecular=1;
+    }
+
+    found = keyword.find("Lindblad");
+    if(found!=std::string::npos){
+	flagMarkovian=1;
+	flagNonsecular=1;
+	flagLindblad = 1;
+    }
+
+    found = keyword.find("ModRed");
+    if(found!=std::string::npos){
+	flagModred = 1;
+	flagMarkovian=1;
+	flagNonsecular=0;
+	flagLindblad = 0;
+    }
 
     // specific part to the modified Redfield
     storage<asymptoticLF_complexv> g1un(1); // gfunctions first derivatives
@@ -175,45 +200,46 @@ int main(int argc, const char * argv[])
     calcR.AddFluctuations(reader.mfun,reader.cfun,reader.gfun,g1un,reader.kij,reader.gij,reader.zijkl);
         //calcR.AddFluctuations(reader.mfun,reader.cfun,reader.kij,reader.gij);
     calcR.tempr=reader.tempr;
-	calcR.nonsecular = reader.nonsecular;
+	//calcR.nonsecular = reader.nonsecular;
+    calcR.flagLindblad = flagLindblad;
 
-    calcR.flagLindblad = 0;
-    found = reader.experiment_complexity.find("Lindblad");
-    if(found!=std::string::npos)
-	calcR.flagLindblad = 1;
+
+    // Getting all required superoperators
+
+
 
 	int num5,num4,num3,num2,num1;
 	double deltaT=0;
 
-    storage<complexv> superoperatorSG(2); // secular markovian
-    storage<double> superoperatorSP(2); // secular markovian
-    storage<complexv> superoperatorM(4); // markovian
-    storage<complexv> superoperatorR(5); // non-markovian
+    storage<complexv> superoperatorSG(2); // secular markovian dephasings
+    storage<double> superoperatorSP(2); // secular markovian populations
+    storage<complexv> superoperatorM(4); // markovian full
+    storage<complexv> superoperatorR(5); // non-markovian full with memory
 
 	storage<double> energiesReorg(2);
 	energiesReorg =  calcR.GetReorganizations();
 
-	if(reader.nonsecular)
-        {
-	        calcR.AddMijkl(reader.zijkl);
-        }
-
+	if(flagNonsecular)
+        calcR.AddMijkl(reader.zijkl);
 
 	if(flagMarkovian)
 	{
-		if(reader.nonsecular)
-	            superoperatorM = calcR.GetRelaxationSuperoperatorM(iblock);
+		if(flagNonsecular)
+	        superoperatorM = calcR.GetRelaxationSuperoperatorM(iblock);
 		else
 		{
-			superoperatorSP = calcR.AddTransportRates();
+            if(flagModred)
+			    superoperatorSP = calcR.GetTransportRatesModRed();
+            else
+			    superoperatorSP = calcR.AddTransportRates();
 			calcR.AddLifetimeDephasings();
 			superoperatorSG = calcR.AddPureDephasings();
 		}
 	}
-        else // this is always nonsecular
+    else // this is always nonsecular
 	{
 		num5 = 0;
-        	superoperatorR = calcR.GetMemoryKernel(0, deltaT, num5 , iblock);
+       	superoperatorR = calcR.GetMemoryKernel(0, deltaT, num5 , iblock);
 		superoperatorR.GetSize(num5,num4,num3,num2,num1);
 	}
 
@@ -259,7 +285,7 @@ int main(int argc, const char * argv[])
     }
 
 
-	if(reader.nonsecular)
+	if(flagNonsecular)
 	{
 
 		if(!flagMarkovian)
@@ -287,7 +313,7 @@ int main(int argc, const char * argv[])
 		{
 			ofs<<"# Eigenstate basis. Full nonsecular Markovian Redfield relaxation operator.\n";
 
-	            superoperatorM = calcR.GetRelaxationSuperoperatorM(iblock);
+            superoperatorM = calcR.GetRelaxationSuperoperatorM(iblock);
 
 
 	        for(int il2 = 0; il2<numL;il2++)
@@ -300,10 +326,10 @@ int main(int argc, const char * argv[])
 
 			complexv cvalue(0,0);
 
-	                if(il2 == ir2 && il1 == ir1){
-	                    cvalue +=  cnni*(reader.evals.data1D[il2+shL]-energiesReorg.data2D[il2+shL][il2+shL]);
-	                    cvalue +=  coni*(reader.evals.data1D[il1+shR]-energiesReorg.data2D[il1+shR][il1+shR]);
-	                }
+//	                if(il2 == ir2 && il1 == ir1){
+//	                    cvalue +=  cnni*(reader.evals.data1D[il2+shL]-energiesReorg.data2D[il2+shL][il2+shL]);
+//	                    cvalue +=  coni*(reader.evals.data1D[il1+shR]-energiesReorg.data2D[il1+shR][il1+shR]);
+//	                }
 	                cvalue += superoperatorM.data4D[il2][il1][ir2][ir1];
 
 			ofs<<il2<<" "<<il1<<" "<<ir2<<" "<<ir1<<" "<<cvalue.real()<<" "<<cvalue.imag()<<"\n";

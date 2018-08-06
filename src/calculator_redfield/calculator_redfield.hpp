@@ -73,12 +73,13 @@ public:
     storage<complexv> AddLifetimeDephasings();
     storage<complexv> AddPureDephasings();
     storage<complexv> GetRelaxationSuperoperatorM(int block);
-    storage<complexv> GetMemoryKernel(double time, double& deltat, int& numT, int block);
+    storage<complexv> GetMemoryKernel(double time, double& deltat, int& numT, int block); // this creates the full Born memory kernel
+    storage<complexv> GetMemoryKern(int block); // this returns only block-organized M-function
     storage<double> GetReorganizations();
     storage<complexv> GetRelaxationSuperoperatorLindblad1(int block);
     storage<double> GetTransportRatesModRed();
 
     int flagLindblad;
-    int nonsecular;
+    //int nonsecular;
     
 };

@@ -552,13 +552,12 @@ storage<complexv> calculator_redfield::GetRelaxationSuperoperatorM(int block)
 
     
     supermatrix.Allocate(numL,numR,numL,numR);
-    if (flagLindblad == 1)
-	return GetRelaxationSuperoperatorLindblad1(block);
+    if (flagLindblad == 1) return GetRelaxationSuperoperatorLindblad1(block);
 
     for(int ia = 0; ia<numL; ia++)
         for(int ib = 0; ib<numR; ib++)
-            for(int ic = 0; ic<numL; ic++)
-                for(int id = 0; id<numR; id++)
+            for(int ia1 = 0; ia1<numL; ia1++)
+                for(int ib1 = 0; ib1<numR; ib1++)
         {
             complexv value = 0.0;
 
@@ -566,37 +565,37 @@ storage<complexv> calculator_redfield::GetRelaxationSuperoperatorM(int block)
             {
 
 
-                if(ib == id)
+                if(ib == ib1)
                 {
-            	    for(int ie=0; ie<numL; ie++)
+            	    for(int ic=0; ic<numL; ic++)
                     {
-                       	double omegaij = evals.data1D[ic+shL]-evals.data1D[ie+shL];
-                      	//omegaij += -reorganizations.data2D[ic+shL][ic+shL] + reorganizations.data2D[ie+shL][ie+shL];
-                       	value = value + Mijkl.data5D[ia+shL][ie+shL][ie+shL][ic+shL][iosc]*mfun.data1D[iosc].Get(omegaij);
+                       	double omegaij = evals.data1D[ia1+shL]-evals.data1D[ic+shL];
+                      	//omegaij += -reorganizations.data2D[ia1+shL][ia1+shL] + reorganizations.data2D[ic+shL][ic+shL];
+                       	value += Mijkl.data5D[ia+shL][ic+shL][ic+shL][ia1+shL][iosc]*mfun.data1D[iosc].Get(omegaij);
                     }
                 }
-                if(ia == ic)
+                if(ia == ia1)
                 {
-            	    for(int ie=0; ie<numR; ie++)
+            	    for(int ic=0; ic<numR; ic++)
                     {
-                       	double omegaij = evals.data1D[id+shR]-evals.data1D[ie+shR];
-                      	//omegaij += -reorganizations.data2D[id+shR][id+shR] + reorganizations.data2D[ie+shR][ie+shR];
-                       	value = value + complexv(Mijkl.data5D[id+shR][ie+shR][ie+shR][ib+shR][iosc]*mfun.data1D[iosc].Get(omegaij)).conjugate();
+                       	double omegaij = evals.data1D[ib1+shR]-evals.data1D[ic+shR];
+                      	//omegaij += -reorganizations.data2D[ib1+shR][ib1+shR] + reorganizations.data2D[ic+shR][ic+shR];
+                       	value += complexv(Mijkl.data5D[ib1+shR][ic+shR][ic+shR][ib+shR][iosc]*mfun.data1D[iosc].Get(omegaij)).conjugate();
                     }
                 }
                 if(true)
                 {
-                  	double omegaij = evals.data1D[id+shR]-evals.data1D[ib+shR];
-                  	//omegaij += -reorganizations.data2D[id+shR][id+shR] + reorganizations.data2D[ib+shR][ib+shR];
-                  	value = value - complexv(Mijkl.data5D[id+shR][ib+shR][ia+shL][ic+shL][iosc]*mfun.data1D[iosc].Get(omegaij)).conjugate();
+                  	double omegaij = evals.data1D[ib1+shR]-evals.data1D[ib+shR];
+                  	//omegaij += -reorganizations.data2D[ib1+shR][ib1+shR] + reorganizations.data2D[ib+shR][ib+shR];
+                  	value -= complexv(Mijkl.data5D[ib1+shR][ib+shR][ia+shL][ia1+shL][iosc]*mfun.data1D[iosc].Get(omegaij)).conjugate();
                 }
                 if(true)
                 {
-                  	double omegaij = evals.data1D[ic+shL]-evals.data1D[ia+shL];
-                  	//omegaij += -reorganizations.data2D[ic+shL][ic+shL] + reorganizations.data2D[ia+shL][ia+shL];
-                  	value = value - Mijkl.data5D[id+shR][ib+shR][ia+shL][ic+shL][iosc]*mfun.data1D[iosc].Get(omegaij);
+                  	double omegaij = evals.data1D[ia1+shL]-evals.data1D[ia+shL];
+                  	//omegaij += -reorganizations.data2D[ia1+shL][ia1+shL] + reorganizations.data2D[ia+shL][ia+shL];
+                  	value -= Mijkl.data5D[ib1+shR][ib+shR][ia+shL][ia1+shL][iosc]*mfun.data1D[iosc].Get(omegaij);
                 }
-                supermatrix.data4D[ia][ib][ic][id] -= value;
+                supermatrix.data4D[ia][ib][ia1][ib1] -= value;
             }
         }
 
@@ -672,34 +671,63 @@ calculator_redfield::GetRelaxationSuperoperatorLindblad1(int block)
     storage<complexv> zabcd(4);
     zabcd.Allocate(num,num,num,num);
 
-// calulcating autocorrelations
+    storage<complexv> zV(3);
+    zV.Allocate(num,num,numBosc);
+
     for(int ia = 0; ia<num; ia++)
-        for(int ib = 0; ib<num; ib++)
-            for(int ic = 0; ic<num; ic++)
-                for(int id = 0; id<num; id++)
-        {
-//       		int ib = ia;
-// 		int id = ic;
-            complexv value1 = 0.0;
-            complexv value2 = 0.0;
-		double omegaij;
+    for(int ic = 0; ic<num; ic++)
+    for(int iosc = 0; iosc<numBosc; iosc++){
+		zV.data3D[ia][ic][iosc] = sqrt(Mijkl.data5D[ic][ia][ia][ic][iosc]);
+    }
 
-            for(int iosc = 0; iosc<numBosc; iosc++)
-            {
-		omegaij = evals.data1D[id]-evals.data1D[ib];
-		//omegaij = evals.data1D[id]-evals.data1D[ib] -reorganizations.data2D[id][id] + reorganizations.data2D[ib][ib];
-		value1 += Mijkl.data5D[id][ib][ia][ic][iosc]*mfun.data1D[iosc].Get(omegaij);
+// calulcating autocorrelations
+    for(int ib = 0; ib<num; ib++)
+    for(int id = 0; id<num; id++)
+    for(int ia = 0; ia<num; ia++)
+    for(int ic = 0; ic<num; ic++)
+    for(int iosc = 0; iosc<numBosc; iosc++){
+
+        double omegaij = evals.data1D[id]-evals.data1D[ib];
+// 		//omegaij = evals.data1D[id]-evals.data1D[ib] -reorganizations.data2D[id][id] + reorganizations.data2D[ib][ib];
+        complexv value1 = mfun.data1D[iosc].Get(omegaij);
                 
-		omegaij = evals.data1D[ic]-evals.data1D[ia];
-		//omegaij = evals.data1D[ic]-evals.data1D[ia] -reorganizations.data2D[ic][ic] + reorganizations.data2D[ia][ia];
-		value2 += Mijkl.data5D[id][ib][ia][ic][iosc]*mfun.data1D[iosc].Get(omegaij);
-	    }
-            zabcd.data4D[ib][id][ia][ic] = value1.conjugate()+value2;
+ 		omegaij = evals.data1D[ic]-evals.data1D[ia];
+// 		//omegaij = evals.data1D[ic]-evals.data1D[ia] -reorganizations.data2D[ic][ic] + reorganizations.data2D[ia][ia];
+ 		complexv value2 = mfun.data1D[iosc].Get(omegaij);
 
 
-			//cout<<"autocorrelation: "<<ib<<" "<<id<<" "<<ia<<" "<<ic<<" "<<zabcd.data4D[ib][id][ia][ic]<<"\n";
-
+            zabcd.data4D[ib][id][ia][ic] +=  (zV.data3D[ib][id][iosc]).conjugate()* zV.data3D[ia][ic][iosc] * (value1.conjugate()+value2);
+			cout<<"autocorrelation: "<<ib<<" "<<id<<" "<<ia<<" "<<ic<<" "<<zabcd.data4D[ib][id][ia][ic]<<"\n";
         }
+
+// // calulcating autocorrelations
+//     for(int ib = 0; ib<num; ib++)
+//     for(int id = 0; id<num; id++)
+//     for(int ia = 0; ia<num; ia++)
+//     for(int ic = 0; ic<num; ic++)
+//         {
+//        		int ib = ia;
+//  		int id = ic;
+//             complexv value1 = 0.0;
+//             complexv value2 = 0.0;
+// 		double omegaij;
+
+//             for(int iosc = 0; iosc<numBosc; iosc++)
+//             {
+// 		omegaij = evals.data1D[id]-evals.data1D[ib];
+// 		//omegaij = evals.data1D[id]-evals.data1D[ib] -reorganizations.data2D[id][id] + reorganizations.data2D[ib][ib];
+// 		value1 += Mijkl.data5D[id][ib][ia][ic][iosc]*mfun.data1D[iosc].Get(omegaij);
+                
+// 		omegaij = evals.data1D[ic]-evals.data1D[ia];
+// 		//omegaij = evals.data1D[ic]-evals.data1D[ia] -reorganizations.data2D[ic][ic] + reorganizations.data2D[ia][ia];
+// 		value2 += Mijkl.data5D[id][ib][ia][ic][iosc]*mfun.data1D[iosc].Get(omegaij);
+// 	    }
+//             zabcd.data4D[ib][id][ia][ic] = value1.conjugate()+value2;
+
+
+// 			cout<<"autocorrelation: "<<ib<<" "<<id<<" "<<ia<<" "<<ic<<" "<<zabcd.data4D[ib][id][ia][ic]<<"\n";
+
+//         }
 
 
 //  // calulcating correlations
@@ -849,7 +877,10 @@ storage<complexv> calculator_redfield::GetMemoryKernel(double time, double& delt
     }
 
 
-
+    cout<<"numL = "<<numL;
+    cout<<"shL = "<<shL;
+    cout<<"numR = "<<numR;
+    cout<<"shR = "<<shR;
 
 
       if(!kernel.IsAlloc())
@@ -878,7 +909,7 @@ storage<complexv> calculator_redfield::GetMemoryKernel(double time, double& delt
 		if(ia==ia1)
 	        for(int id=0;id<numR;id++)
 		{
-			double omegat = evals.data1D[ia+shL]-evals.data1D[id+shR];
+			double omegat = evals.data1D[ia1+shL]-evals.data1D[id+shR];
 		        for(int io=0;io<numosc;io++)
 			R4 += exp(cnni*omegat*tau)*Mijkl.data5D[ib1+shR][id+shR][id+shR][ib+shR][io]*conj(cfun.data1D[io].Get(tau));
 		}
@@ -886,7 +917,7 @@ storage<complexv> calculator_redfield::GetMemoryKernel(double time, double& delt
 		{
 			double omegat = evals.data1D[ia1+shL]-evals.data1D[ib+shR];
 		        for(int io=0;io<numosc;io++)
-			R2 += exp(cnni*omegat*tau)*Mijkl.data5D[ia+shL][ia1+shL][ib1+shR][ib+shR][io]*conj(cfun.data1D[io].Get(tau));
+			R2 += exp(cnni*omegat*tau)*Mijkl.data5D[ib1+shR][ib+shR][ia+shL][ia1+shL][io]*conj(cfun.data1D[io].Get(tau));
 		}
 		complexv R3=0;
 		{
@@ -895,12 +926,82 @@ storage<complexv> calculator_redfield::GetMemoryKernel(double time, double& delt
 			R3 += exp(cnni*omegat*tau)*Mijkl.data5D[ia+shL][ia1+shL][ib1+shR][ib+shR][io]*cfun.data1D[io].Get(tau);
 		}
 	
-        kernel.data5D[it][ia][ib][ia1][ib1] = -(R1-R2-R3+R4);
+        if(it==0)
+            kernel.data5D[it][ia][ib][ia1][ib1] = -(R1-R2-R3+R4)/2.0;
+            // this is needed for integration by trapecia
+        else
+            kernel.data5D[it][ia][ib][ia1][ib1] = -(R1-R2-R3+R4);
       }
     }
 
+//    cout<<"M(omega=0) = "<<mfun.data1D[0].Get(0)<<"\n";
+//    cout<<"M(t) function:\n";
+//    cout<<"dt = "<<deltat<<"\n";
+//    for(int it=0;it<numT;it++)
+//    cout<<cfun.data1D[0].Get(deltat*it)<<"\n";
+
+    cout<<"Kernel specific element kernel.data5D[it][1][1][2][2]\n";
+    cout<<"Mijkl.data5D[1][2][2][1][0] = "<<Mijkl.data5D[1+1][2+1][2+1][1+1][0]<<"\n";
+    cout<<"dt = "<<deltat<<"\n";
+    for(int it=0;it<numT;it++)
+    cout<<kernel.data5D[it][1][1][2][2]<<"\n";
         
     return kernel;
+            
+}
+
+////////////////////////////
+// the factorized form of the memory kernel (without cfun)
+storage<complexv> calculator_redfield::GetMemoryKern(int block)
+// block should be 
+// 0, 10, 11, 20, 21, 22
+{
+
+    if(!Mijkl.IsAlloc())
+    {
+        cout<<"Error: calculator_redfield::SetupMemoryKernel: fluctuation matrix is missing\n";
+        return kernel;
+    }
+
+
+
+    int numL,numR,shL,shR;
+    if(block == 0)
+    {    
+        numL = numG;
+        numR = numG;
+        shL = 0;
+        shR = 0;
+    }
+    else if( (block == 10) || (block == 11) )
+    {    
+        numL = numE+numG;
+        numR = numE+numG;
+        shL = 0;
+        shR = 0;
+    }
+    else 
+    {    
+        numL = numF+numE+numG;
+        numR = numF+numE+numG;
+        shL = 0;
+        shR = 0;
+    }
+
+    // here M matrix is converted into blocks and returned
+    storage<complexv> retM(3);
+    retM.Allocate(cfun.GetSize(),numL*numL,numR*numR);
+
+    for(int ia=0;ia<numL;ia++)
+    for(int ia1=0;ia1<numL;ia1++)
+
+    for(int ib=0;ib<numR;ib++)
+    for(int ib1=0;ib1<numR;ib1++)
+
+    for(int io=0;io<cfun.GetSize();io++)
+        retM.data3D[io][ia*numL+ia1][ib*numR+ib1] =  Mijkl.data5D[ia][ia1][ib][ib1][io];
+        
+    return retM;
             
 }
 
@@ -931,7 +1032,7 @@ void calculator_redfield::Setup()
 
     flagLindblad = 0;
 	tempr = 0;
-	nonsecular = 0;
+	//nonsecular = 0;
 }
 
 

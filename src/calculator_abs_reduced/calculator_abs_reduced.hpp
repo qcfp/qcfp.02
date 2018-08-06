@@ -210,7 +210,7 @@ void calculator_abs_reduced<Type>::Launch()
         if(prop10 == 0)
 	{
             prop10 = new Type(*this);
-	    	prop10->calcR->nonsecular = nonsecular;
+	    	prop10->flagNonsecular = nonsecular;
 		prop10->flagMarkovian=markovian;
 		prop10->calcR->flagLindblad = lindblad;
 		prop10->SetBlock(10);

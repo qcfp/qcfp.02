@@ -92,6 +92,8 @@ public:
     int transport;
     int nonsecular;
     
+    double propagationparameterStep;
+    double propagationparameterNump;
 
     // Experiments
     // interaction configurations:

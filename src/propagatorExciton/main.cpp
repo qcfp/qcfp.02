@@ -35,10 +35,6 @@ int main(int argc, const char * argv[])
         cout<<"Error: input file cannot be read\n";
 	return 0;
     }
-    //toolsIO tio;
-
-    // reading the whole input file
-    // perform calculations based on filename:
     communicator_3rd reader;
 	tio.ReadWholeFile(ifilename,reader.inputfile,1);
 
@@ -164,7 +160,7 @@ int main(int argc, const char * argv[])
 
     double timestep=0.1;
 	if(tio.LookUpAndReadSquareMatrix<double>(
-			"MethodTimestep:",
+			"MethodTimeStep:",
 			"Reading the output timestep\n", 
 			1,1, arr,reader.inputfile.str()))
 		{
@@ -182,35 +178,54 @@ int main(int argc, const char * argv[])
 ////////////////////////////////////////////////////////////////////
 
     std::size_t found;
-    found = keyword.find("Nonsecular");
-    if(found!=std::string::npos)
-	reader.nonsecular = 1;
+    //found = keyword.find("NonSecular");
+    //if(found!=std::string::npos)
+	//reader.nonsecular = 1;
+    // secular holds only for Markovian
+    // nonsecular simple = full Redfield
 
     reader.MakeESSystem();
     propagatorExciton pE(reader);
 
-     // setting initial condition
-    pE.dmatrix0 = initials;
-    
-    
-   // SecularRedfield
-    // MarkovianRedfield
-    // LindbladRedfield
-    //if(keyword.compare("MarkovianRedfield")==0)
-    //pE.SetMarkovian(true);
-    
     found = keyword.find("NonMarkovian");
-    if(found!=std::string::npos)
-	pE.SetMarkovian(0);
+    if(found!=std::string::npos){
+	pE.flagMarkovian=0;
+	pE.flagMemoryWithCfun=0;
+	pE.flagNonsecular=1;
+    }
+
+    found = keyword.find("NonMarkovianCFun");
+    if(found!=std::string::npos){
+    pE.flagMarkovian=0;
+	pE.flagMemoryWithCfun=1;
+	pE.flagNonsecular=1;
+    }
+
+    found = keyword.find("NonSecular");
+    if(found!=std::string::npos){
+	pE.flagNonsecular=1;
+    }
 
     found = keyword.find("Lindblad");
-    if(found!=std::string::npos)
+    if(found!=std::string::npos){
+	pE.flagMarkovian=1;
+	pE.flagNonsecular=1;
 	pE.calcR->flagLindblad = 1;
+    //pE.calcR->nonsecular=1
+    }
 
 
     found = keyword.find("ModRed");
-    if(found!=std::string::npos)
+    if(found!=std::string::npos){
 	pE.flagModred = 1;
+	pE.flagMarkovian=1;
+	pE.flagNonsecular=0;
+	pE.calcR->flagLindblad = 0;
+    //pE.calcR->nonsecular=0
+    }
+
+     // setting initial condition
+    pE.dmatrix0 = initials;
 
 
     // making time trace variable

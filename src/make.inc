@@ -36,10 +36,10 @@ ifeq ($(SYSTEM),WINDOWS)
 COPY=copy
 DEL=del /Q
 CC=cl
-#CCOPT=/W4 /EHsc /c /O2  /I ..\..\..\fftw-3.3.5-dll64
-CCOPT=/W4 /EHsc /c  /I ..\..\..\fftw-3.3.5-dll64
+#CCOPT=/W4 /EHsc /c /O2  /I ..\..\..\fftw-3.3.5-dll32
+CCOPT=/W4 /EHsc /c  /I ..\..\..\fftw-3.3.5-dll32
 CLOPT=/link \
-	/LIBPATH ..\..\..\fftw-3.3.5-dll64\libfftw3-3.lib \
+	/LIBPATH ..\..\..\fftw-3.3.5-dll32\libfftw3-3.lib \
 	/LIBPATH ..\..\..\lapack\liblapack.lib \
 	/LIBPATH ..\..\..\lapack\libblas.lib
 LIBO=/Fo
