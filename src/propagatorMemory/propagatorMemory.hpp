@@ -1,4 +1,4 @@
-/* 
+/*
  * File:   propagatorMemory.hpp
  * Author: dariusa
  *
@@ -11,7 +11,7 @@
 
 // ***********************
 // master equation with memory
-// 
+//
 // the translationary invariant time-depenant kernel is prepared by the user
 // the class makes
 // propagation
@@ -33,34 +33,34 @@ class propagatorMemory:
 public propagatorM
 {
 public:
-    
-    // simply designed to solve equation 
+
+    // simply designed to solve equation
     // d p / dt = - int_0^{\infty} ds kernel(s) * p(t-s)
-    
+
 	propagatorMemory();
-    
+
 	~propagatorMemory();
     // usage : create the kernel (kernel) and the initial vector with history (DMM)
     // Propagate
 
-    
+
     // this function initializes the algorithm
-    void Initialize(storage<complexv>& kernel, 
-                    storage<double>& omegas_memory, 
-                    storage<complexv>& DMM, 
+    void Initialize(storage<complexv>& kernel,
+                    storage<double>& omegas_memory,
+                    storage<complexv>& DMM,
                     storage<double>& timesinternal);
     void Initialize(propagatorMemory& prop);
     void InitializeHistory(propagatorMemory& prop);
-    
+
     // this function calculates current variables when derivs is given
     void Update( storage<complexv>& der, double timestep);
-    
+
     // this function calculates derivatives when kernel is given
     void Convolute(storage<complexv>& der);
 
     // this function makes the next step when derivatives are given
     storage<complexv> Propagate(storage<double>& times);
-    
+
 
     // accessory functions to convert to/from Liouville space
     storage<complexv> Convert3DTo5D(storage<complexv> input,int num4,int num3,int num2,int num1);
@@ -75,7 +75,8 @@ public:
     // absolute history times
     // notice: time goes in reverse direction
     storage<double> timesinternal;
-
+    double internaltimeS;
+    int internaltimeN;
     // block 0:
     // kernel
     storage<complexv>* kernel;
@@ -85,7 +86,7 @@ public:
 
     //history matrix 1
     storage<complexv>* DMM;
-    
+
     // notice that blocks are not used with cfun.... not clear if they make any use
 
     // block 1:
@@ -98,7 +99,7 @@ public:
     storage<double> omegas_memory2;
     storage<complexv>* DMM2;
 
-    // entry points of different blocks    
+    // entry points of different blocks
     double manifold0End;
     double manifold1End;
     double manifold2End;
@@ -106,4 +107,3 @@ public:
 
 
 #endif	/* PROPAGATORMEMORY_HPP */
-

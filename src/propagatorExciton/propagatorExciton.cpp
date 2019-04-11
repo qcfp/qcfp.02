@@ -10,19 +10,19 @@ propagatorExciton::propagatorExciton(int ig,int ie,int jf)
     numG = ig;
     numE = ie;
     numF = jf;
-    
+
     meanEg = 0.0;
     meanEe = 0.0;
     meanEf = 0.0;
 
-    
+
     flagMarkovian = 1; // Markovian
     flagModred = 0; // Population rates from modified Redfield
 	flagNonsecular = 0; // secular only when markovian
-    
+
     dmatrixT.SetDimension(2);
     dmatrix0.SetDimension(2);
-    
+
     calcR = 0;
 	superoperatorReady = 0;
 
@@ -48,13 +48,13 @@ propagatorExciton::propagatorExciton(communicator_3rd& comm)
     meanEf = 0.0;
 
     flagMarkovian = 1;
-    flagModred = 0; // 
+    flagModred = 0; //
 	flagNonsecular = 0; // secular only when markovian
 	superoperatorReady = 0;
 
     dmatrixT.SetDimension(2);
     dmatrix0.SetDimension(2);
-    
+
 	block=-1;
 	numL=0;
 	numR=0;
@@ -72,8 +72,8 @@ propagatorExciton::propagatorExciton(communicator_3rd& comm)
         numF = comm.numF;
 
 
-        SetEnergies(comm.evals);  
-  
+        SetEnergies(comm.evals);
+
 
 
     // specific part to the modified Redfield
@@ -87,7 +87,7 @@ propagatorExciton::propagatorExciton(communicator_3rd& comm)
         g1un.data1D[ind] = spd.GetGfD1f();
     }
     }
-    
+
     calcR = new calculator_redfield(energies, numG, numE, numF);
     calcR->AddFluctuations(comm.mfun,comm.cfun,comm.gfun,g1un,comm.kij,comm.gij,comm.zijkl);
 
@@ -117,19 +117,19 @@ propagatorExciton::~propagatorExciton()
         calcR = 0;
     }
 	superoperatorReady = 0;
-    
+
 }
 
 
 void propagatorExciton::SetEnergies(storage<double>& ien)
 {
     energies = ien;
-    
-    
+
+
     meanEg = 0.0;
     meanEe = 0.0;
     meanEf = 0.0;
-    
+
     for(int ind=0;ind<numG;ind++)
     {
         meanEg += ien.data1D[ind];
@@ -145,7 +145,7 @@ void propagatorExciton::SetEnergies(storage<double>& ien)
         meanEf += ien.data1D[ind+numG+numE];
     }
     meanEf = meanEf /numF;
-    
+
 }
 
 
@@ -155,17 +155,17 @@ void propagatorExciton::SetFluctuationMatrices
 {
 //    if(fAmplitudes.IsAlloc()) // complete matrix
 //            return;
-//    
+//
 //    if(!mfun.IsAlloc())
 //    {
 //        std::cout<<"Error: propagatorExciton::SetFluctuationMatrices: set fluctuation functions\n";
 //        return;
 //    }
-//        
+//
 //    fAmplitudes.SetDimension(5);
 //    int numBO = mfun.GetSize();
 //    fAmplitudes.Allocate(numG+numE+numF,numG+numE+numF,numG+numE+numF,numG+numE+numF,numBO);
-//    
+//
 //    for(int inz=0; inz<numBO; inz++)
 //    {
 //        // setting gg block:
@@ -176,7 +176,7 @@ void propagatorExciton::SetFluctuationMatrices
 //        {
 //            fAmplitudes.data5D[ina][inb][inc][ind][inz] = matr00.data5D[inz][ina][inb][inc][ind];
 //        }
-//        
+//
 //        // setting eg block:
 //        for(int ina=0; ina<numE; ina++)
 //        for(int inb=0; inb<numE; inb++)
@@ -215,7 +215,7 @@ void propagatorExciton::SetFluctuationMatrices
 //            fAmplitudes.data5D[ina+numG+numE][inb+numG+numE][inc+numG][ind+numG][inz] = matr21.data5D[inz][ina][inb][inc][ind];
 //            fAmplitudes.data5D[inc+numG][ind+numG][ina+numG+numE][inb+numG+numE][inz] = matr21.data5D[inz][ina][inb][inc][ind];
 //        }
-//        
+//
 //        // setting ff block:
 //        for(int ina=0; ina<numF; ina++)
 //        for(int inb=0; inb<numF; inb++)
@@ -311,7 +311,7 @@ storage<complexv> propagatorExciton::PropagateDM(storage<double>& times)
 	    {
         	cout<<"Error: calculator in propagatorExciton::PropagateDMB is not ready\n";
 	    }
-          
+
         energiesReorg =  calcR->GetReorganizations();
 
 	superoperatorReady = 1;
@@ -330,7 +330,7 @@ storage<complexv> propagatorExciton::PropagateDM(storage<double>& times)
 		}
 	}
         else if(flagMemoryWithCfun) // this is always nonsecular
-		{ // this is  memory relaxation kernel 
+		{ // this is  memory relaxation kernel
 			// factorized into amplitudes (kernel)
 			// and correlation functions
 
@@ -366,8 +366,15 @@ storage<complexv> propagatorExciton::PropagateDM(storage<double>& times)
 		else
 		{	// this is full memory relaxation kernel as a function of time
 			cout<<"Preparing complete non-Markovian relaxation tensor\n";
-			int numT=0;
-			double deltaT=0;
+      int numT=0;
+      double deltaT=0;
+      if (internaltimeN != 0)
+      {
+        int numT=internaltimeN;
+  			double deltaT=internaltimeS;
+        cout << "internal time points: "<< numT << "\n";
+        cout << "internal time steps" << deltaT << "\n";
+      }
         	superoperatorR = calcR->GetMemoryKernel(0, deltaT, numT , block);
 			DMMcontinousInternalTimeStep = deltaT;
 	        DMMcontinousInternalTimeNump = numT;
@@ -387,8 +394,8 @@ storage<complexv> propagatorExciton::PropagateDM(storage<double>& times)
 				omegas_memory.data1D[id2*numR+id1]=energies.data1D[id2+shL]-energies.data1D[id1+shR];
 			}
 
-		
-		
+
+
 			// also setting the history of density matrix into 1D form:
 			if(!dmatrixT.IsAlloc())
 			{
@@ -406,11 +413,11 @@ storage<complexv> propagatorExciton::PropagateDM(storage<double>& times)
         	kernel = &superoperatorR;
         	DMM = &dmatrixT;
         	int timeN = timesinternal.GetSize();
-        	manifold0End = timesinternal.data1D[timeN-1]-constants::smallepsilon;
+        	//manifold0End = timesinternal.data1D[timeN-1]-constants::smallepsilon;
 
 		}
     }// done with preparing the kernels
-    
+
     storage<complexv> result(3);
 
     // getting timestep
@@ -424,12 +431,12 @@ storage<complexv> propagatorExciton::PropagateDM(storage<double>& times)
         cout<<"Error: input argument must be a time series (at leat two elements)\n";
         return result;
     }
-    
+
     double td = times.data1D[1]-times.data1D[0];
     double ti = times.data1D[0];
     int tvals = times.GetSize();
     result.Allocate(tvals,numL,numR);
-    
+
     // propagation from time0 to timet;
     if(flagMarkovian)
     {
@@ -441,7 +448,7 @@ storage<complexv> propagatorExciton::PropagateDM(storage<double>& times)
 		// making Liouville superoperator
 	        storage<complexv> matrix(2);
 	        matrix.Allocate(numL*numR,numL*numR);
-        
+
 	        for(int il2 = 0; il2<numL;il2++)
         	for(int il1 = 0; il1<numR;il1++)
         	{
@@ -450,7 +457,7 @@ storage<complexv> propagatorExciton::PropagateDM(storage<double>& times)
 	            for(int ir1 = 0; ir1<numR;ir1++)
 	            {
 	                int ir = ir2*numR+ir1;
-	
+
 	                matrix.data2D[il][ir] = 0.0;
 	                if(il2 == ir2 && il1 == ir1){
 	                    matrix.data2D[il][ir] +=  cnni*(energies.data1D[il2+shL]-energiesReorg.data2D[il2+shL][il2+shL]);
@@ -500,12 +507,12 @@ storage<complexv> propagatorExciton::PropagateDM(storage<double>& times)
                           argument += coni*(energies.data1D[il1+shR]-energiesReorg.data2D[il1+shR][il1+shR]);
                           argument -= superoperatorSG.data2D[il2+shL][il1+shR];
 	                  result.data3D[numt][il2][il1] = exp(argument*times.data1D[numt])*dmatrix0.data2D[il2][il1];
-                
+
 	                  if(numt == tvals-1)
-        	            dmatrix0.data2D[il2][il1] = result.data3D[numt][il2][il1];          
+        	            dmatrix0.data2D[il2][il1] = result.data3D[numt][il2][il1];
 		        }
         	}
-        
+
 	if(block ==0 ||block ==11 ||block ==22)
 	{
 		// part B - populations
@@ -535,10 +542,10 @@ storage<complexv> propagatorExciton::PropagateDM(storage<double>& times)
             		for(int il2 = 0; il2<numL;il2++)
             		{
 	                  result.data3D[numt][il2][il2] = retval.data1D[il2];
-                
+
 	                  if(numt == tvals-1)
         	            dmatrix0.data2D[il2][il2] = retval.data1D[il2];
-            
+
 		        }
         	}
 	}}
@@ -548,7 +555,7 @@ storage<complexv> propagatorExciton::PropagateDM(storage<double>& times)
 	// this is non-markovian part
         //cout<<"Error: sorry, this part of code is missing\n";
 	// I will propagate the Interaction representation internally
-	
+
 	cout<<"Propagating NonMarkovian\n";
 	result =  Propagate(times);
 	result = Convert2DTo3D(result,numL,numR);
@@ -612,7 +619,7 @@ void propagatorExciton::SetDeltaDM(int& ie,int &ig)
         dmatrix0.data2D[ig1][ig2] = 0.0;
     }
     dmatrix0.data2D[ie][ig] = 1.0;
-            
+
 }
 
 
@@ -699,7 +706,7 @@ void propagatorExciton::ConvoluteCfun(
 			R3 += exp(cnni*omegat*tau)*kernel->data3D[io][(ia+shL)*numL+(ia1+shL)][(ib1+shR)*numR+(ib+shR)]
                     *cfun_requested;
 		}
-	
+
 		double omega = energies.data1D[ia1+shL]-energies.data1D[ib1+shR];
 
         der.data1D[ia*numR+ib] =  -(R1-R2-R3+R4)*exp(coni*(omegalxtimel-omega*time))
@@ -709,8 +716,8 @@ void propagatorExciton::ConvoluteCfun(
 
 
 	}// summation over bath oscillators
-            
-    }// summation over ia ib 
+
+    }// summation over ia ib
 } // end of function
 
 
@@ -718,19 +725,18 @@ void propagatorExciton::ConvoluteCfun(
 // propagates DMM with respect to itself and history DMM1 and DMM2
 storage<complexv> propagatorExciton::Propagate(storage<double>& times)
 {
-    
+
     // external propagation parameters
     double tdext = times.data1D[1]-times.data1D[0];
     double tiext = times.data1D[0];
     int tvalsext = times.GetSize();
-    
+
     // internal propagation parameters
-	double tiint = timesinternal.data1D[0]; 
     double tdint = timesinternal.data1D[0]-timesinternal.data1D[1];
     int numT,dimension;
     DMM->GetSize(numT,dimension);
 
-	if(flagMemoryWithCfun) 
+	if(flagMemoryWithCfun)
 	// create continous representation of DMM
 	// with time starting from zero and going upwards
 	{
@@ -748,40 +754,51 @@ storage<complexv> propagatorExciton::Propagate(storage<double>& times)
 		DMMcontinous.data1D[ix]=tfun;
 		}
 	}
-    
-    
-    storage<complexv> ret(2); 
-    ret.Allocate(numT,dimension);
-    
+
+
+    storage<complexv> ret(2);
+    ret.Allocate(tvalsext,dimension);
+
     storage<complexv> derivs(1);
     derivs.Allocate(dimension);
-    
+
     //loops over external times
     for(int itext=0;itext<tvalsext;itext++)
     {
         double timeext = times.data1D[itext];
-                
+
         // propagation with small internal timesteps;
+				double tiint = timesinternal.data1D[0];
         int numloops = (int)((timeext-tiint)/tdint); // this should return floor value
         double reminder = timeext-tiint-numloops*tdint;
-        
+
+				//cout<<"space\n";
+				//cout<<"timeext = "<<timeext<<"\n";
+				//cout<<"numloops = "<<numloops<<"\n";
+				//cout<<"reminder = "<<reminder<<"\n";
+
         for(int it=0;it<numloops;it++)
         {
             ConvoluteGen( derivs);
-            Update(derivs,tdint);
+            Update(derivs,tdint); // tdint is optional
         }
-        
-        
+
+
         // doing reminder assignment:
         ConvoluteGen( derivs);
         // and new result
+				// DMM matrix is not updated
         for(int ap = 0; ap<dimension; ap++)
         {
             double omega = omegas_memory.data1D[ap];
             ret.data2D[itext][ap] = exp(cnni*omega*timeext)*(DMM->data2D[0][ap] + derivs.data1D[ap]*reminder);
         }
+				//timesinternal.FillLinear(
+				//		timesinternal.data1D[0]+reminder,
+				//		timesinternal.data1D[1]-timesinternal.data1D[0],
+				//		timesinternal.GetSize());
+
     }
-    
+
     return ret;
 }
-

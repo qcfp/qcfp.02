@@ -48,7 +48,7 @@ int main(int argc, const char * argv[])
     string keyword;
     cout<<"Reading text-format keyword denoting approach of propagation:\n";
     // keyword denoting approach of propagation
-    // available options are: 
+    // available options are:
     // SecularRedfield
     // MarkovianRedfield
     // LindbladRedfield
@@ -67,7 +67,7 @@ int main(int argc, const char * argv[])
 	// specific methods for this calculator
 	if(tio.LookUpAndReadSquareMatrix<int>(
 			"MethodBlockSelector:",
-			"Reading the block to propagate\n", 
+			"Reading the block to propagate\n",
 			1,1, iri,reader.inputfile.str()))
 		{
 			iblock=iri.data2D[0][0];
@@ -129,15 +129,15 @@ int main(int argc, const char * argv[])
         cout<<"Error: exciton block specified incorrectly\n";
         return 0;
     }
-        
 
- 
+
+
     // Initial condition matrix: real parts
     storage<complexv> initials(2);
     initials.Allocate(numL,numR);
 	if(tio.LookUpAndReadSquareMatrix<double>(
 			"MethodInitialConditionMatrixRe:",
-			"Reading the initial condition matrices: Re\n", 
+			"Reading the initial condition matrices: Re\n",
 			numL,numR, arr,reader.inputfile.str()))
 		{
             for(int ind=0; ind<numL; ind ++)
@@ -148,7 +148,7 @@ int main(int argc, const char * argv[])
         }
 	if(tio.LookUpAndReadSquareMatrix<double>(
 			"MethodInitialConditionMatrixIm:",
-			"Reading the initial condition matrices: Im\n", 
+			"Reading the initial condition matrices: Im\n",
 			numL,numR, arr,reader.inputfile.str()))
 		{
             for(int ind=0; ind<numL; ind ++)
@@ -160,8 +160,8 @@ int main(int argc, const char * argv[])
 
     double timestep=0.1;
 	if(tio.LookUpAndReadSquareMatrix<double>(
-			"MethodTimeStep:",
-			"Reading the output timestep\n", 
+			"MethodOutputTimeStep:",
+			"Reading the output timestep\n",
 			1,1, arr,reader.inputfile.str()))
 		{
             timestep = arr.data2D[0][0];
@@ -169,12 +169,34 @@ int main(int argc, const char * argv[])
 
     int timepoints;
 	if(tio.LookUpAndReadSquareMatrix<int>(
-			"MethodTimePoints:",
-			"Reading the number of points on the output\n", 
+			"MethodOutputTimePoints:",
+			"Reading the number of points on the output\n",
 			1,1, iri,reader.inputfile.str()))
 		{
             timepoints = iri.data2D[0][0];
         }
+
+
+	//implementation of internaltimeS and internaltimeN
+        double internaltimestep=0;
+	if(tio.LookUpAndReadSquareMatrix<double>(
+    			"MethodInternalTimeStep:",
+    			"Reading the timestep for correlation function\n",
+    			1,1, arr,reader.inputfile.str()))
+  		{
+          internaltimestep = arr.data2D[0][0];
+     	 }
+
+        int internaltimepoints;
+	if(tio.LookUpAndReadSquareMatrix<int>(
+    			"MethodInternalTimePoints:",
+    			"Reading the number of points of correlation function\n",
+    			1,1, iri,reader.inputfile.str()))
+  		{
+          internaltimepoints = iri.data2D[0][0];
+      	}
+
+
 ////////////////////////////////////////////////////////////////////
 
     std::size_t found;
@@ -226,7 +248,8 @@ int main(int argc, const char * argv[])
 
      // setting initial condition
     pE.dmatrix0 = initials;
-
+    pE.internaltimeS = internaltimestep;
+    pE.internaltimeN =internaltimepoints;
 
     // making time trace variable
     storage<double> times(1);
@@ -237,11 +260,12 @@ int main(int argc, const char * argv[])
 
     // checking the block for propagation
     pE.SetBlock(iblock);
+		pE.manifold0End = 0;
     dmt = pE.PropagateDM(times);
 
 
 
-    
+
     // printing result to output file:
     ofstream ofs(ofilename.c_str());
 
@@ -270,5 +294,5 @@ int main(int argc, const char * argv[])
 
 
 
-    
+
 }

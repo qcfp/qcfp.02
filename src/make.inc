@@ -2,8 +2,8 @@
 # NOT USED IN contructor-excitons
 
 
-#SYSTEM=GNULINUX
-SYSTEM=WINDOWS
+SYSTEM=GNULINUX
+#SYSTEM=WINDOWS
 MPI_COMPILE=FALSE
 
 
@@ -18,13 +18,13 @@ endif
 # FOR MACOSX AND GNULINUX:
 ifeq ($(SYSTEM),GNULINUX)
 COPY=cp
-DEL=rm -f 
+DEL=rm -f
 #CC=llvm-g++
 #CC=g++-5
 CC=g++
-CCOPT=-O2 -c  -I ~/usr/include 
-#CCOPT=--debug -c  -I ~/usr/include 
-CLOPT= -lfftw3 -llapack -lblas  -L ~/usr/lib 
+#CCOPT=-O2 -c  -I ~/usr/include
+CCOPT=--debug -c  -I ~/usr/include
+CLOPT= -lfftw3 -llapack -lblas  -L ~/usr/lib
 LIBO=-o
 BINO=-o
 LIBS=../../lib/
@@ -54,7 +54,7 @@ endif
 ifeq ($(BINARY),TRUE)
 default: depends $(BINS)z.$(PROJECT) binaries
 else
-default: depends $(BINS)z.$(PROJECT) 
+default: depends $(BINS)z.$(PROJECT)
 endif
 	echo "Done"
 
@@ -64,13 +64,13 @@ $(BINS)z.$(PROJECT): \
  $(foreach val,$(DEPENDENCIES), $(LIBS)$(val).obj )
 	$(CC) $(BINO)$(BINS)z.$(PROJECT) \
 	$(LIBS)$(PROJECT).obj $(LIBS)$(PROJECT).main.obj  \
-	$(foreach val,$(DEPENDENCIES), $(LIBS)$(val).obj) $(CLOPT) 
+	$(foreach val,$(DEPENDENCIES), $(LIBS)$(val).obj) $(CLOPT)
 
 $(LIBS)$(PROJECT).obj: $(PROJECT).cpp $(PROJECT).hpp
-	$(CC) $(PROJECT).cpp $(LIBO)$(LIBS)$(PROJECT).obj $(CCOPT) 
+	$(CC) $(PROJECT).cpp $(LIBO)$(LIBS)$(PROJECT).obj $(CCOPT)
 
 $(LIBS)$(PROJECT).main.obj: main.cpp $(PROJECT).hpp
-	$(CC) main.cpp  $(LIBO)$(LIBS)$(PROJECT).main.obj $(CCOPT) 
+	$(CC) main.cpp  $(LIBO)$(LIBS)$(PROJECT).main.obj $(CCOPT)
 
 $(foreach val,$(DEPENDENCIES), $(LIBS)$(val).obj ):
 
@@ -80,6 +80,5 @@ depends:
 clean:
 	$(DEL) $(LIBS)$(PROJECT)* $(BINS)*$(PROJECT)*
 
-binaries: $(BINS)z.$(PROJECT) 
+binaries: $(BINS)z.$(PROJECT)
 	$(COPY) $(BINS)z.$(PROJECT) $(BINS)qcfp.$(PROJECT).exe
-

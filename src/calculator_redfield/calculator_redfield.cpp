@@ -6,7 +6,7 @@
 #include"../numericalSD/numericalSD.hpp"
 
 #include"calculator_redfield.hpp"
-    
+
 calculator_redfield::calculator_redfield()
 {
     ready = 0;
@@ -21,7 +21,7 @@ storage<double>& ielevs)
 
     // acquire system parameters
     evals = ielevs;
-        
+
     ready = 0;
 }
 
@@ -33,7 +33,7 @@ storage<double>& ielevs, int numg, int nume, int numf)
 
     // acquire system parameters
     evals = ielevs;
-        
+
     ready = 0;
     numG = numg;
     numE = nume;
@@ -64,7 +64,7 @@ void calculator_redfield::AddFluctuations
     gij = igij; // amplitudes for all pairs
 
     ready = 1;
-    
+
     int numl = evals.GetSize();
     int numBosc = mfun.GetSize();
 
@@ -110,11 +110,11 @@ storage<double> calculator_redfield::GetReorganizations()
 
 storage<double> calculator_redfield::AddTransportRates()
 {
-    // here I create redfield rates and 
+    // here I create redfield rates and
     // dephasing constants from mfun
-    
+
     int numG = evals.GetSize();
-    
+
     if(!rates.IsAlloc())
     {
         rates.Allocate(numG,numG);
@@ -125,7 +125,7 @@ storage<double> calculator_redfield::AddTransportRates()
 
         for(int iosc = 0; iosc<numBosc; iosc ++)
         {
-        
+
         	for(int ia = 0; ia<numG; ia++)
         		for(int ib = 0; ib<numG; ib++)
         			if(ia != ib)
@@ -135,7 +135,7 @@ storage<double> calculator_redfield::AddTransportRates()
                 rates.data2D[ia][ib] += 2.0*kij.data3D[ia][ib][iosc]*(mfun.data1D[iosc].Get(-omegaij)).real();
         			}
         }
-    
+
         // filling diagonal values
         for(int ia = 0; ia<numG; ia++)
         {
@@ -159,10 +159,10 @@ storage<double> calculator_redfield::AddTransportRates()
         	}
         }
     }
-    
-    
+
+
     return rates;
-    
+
 }
 
 storage<double> calculator_redfield::GetTransportRatesModRed()
@@ -187,9 +187,9 @@ storage<double> calculator_redfield::GetTransportRatesModRed()
 	complexv Facaa = 0.0;
 	complexv Faccc = 0.0;
 	complexv Fcaac = 0.0;
-    
+
     int num = evals.GetSize();
-    
+
     if(!rates.IsAlloc())
     {
         rates.Allocate(num,num);
@@ -197,21 +197,21 @@ storage<double> calculator_redfield::GetTransportRatesModRed()
         // number of bath oscillators
         int numBosc = mfun.GetSize();
 
-    
+
 
         	for(int ia = 0; ia<num; ia++)
         		for(int ic = 0; ic<num; ic++)
         			if(ia != ic)
         			{
-                        
-                        
-    
-                // updating reorganization energies from M 
+
+
+
+                // updating reorganization energies from M
                 laccc = 0.0;
                 lcacc = 0.0;
                 lcccc = 0.0;
                 lccaa = 0.0;
-	
+
                 for(int inb = 0; inb<numBosc; inb++)
                 {
                     laccc += Mijkl.data5D[ia][ic][ic][ic][inb]*(mfun.data1D[inb].Get(0)).imag();
@@ -224,16 +224,16 @@ storage<double> calculator_redfield::GetTransportRatesModRed()
                 lcccc = -lcccc;
                 lccaa = -lccaa;
 
-                
+
         complexv fval = 0.0;
 
         for(int inb = 0; inb<numBosc; inb ++)
         {
-    
+
         // getting time integration parameters
         int numt = gfun.data1D[inb].GetN();
         double tmax = gfun.data1D[inb].GetXF();
-        double step = tmax/numt; 
+        double step = tmax/numt;
 
 
         // time integration
@@ -248,21 +248,21 @@ storage<double> calculator_redfield::GetTransportRatesModRed()
 
 			// g functions
 			complexv G0Scccc = Mijkl.data5D[ic][ic][ic][ic][inb]*g0;
-			complexv G0Sccaa = Mijkl.data5D[ic][ic][ia][ia][inb]*g0; 
-			complexv G0Saaaa = Mijkl.data5D[ia][ia][ia][ia][inb]*g0; 
-			complexv G0Saacc = Mijkl.data5D[ia][ia][ic][ic][inb]*g0; 
+			complexv G0Sccaa = Mijkl.data5D[ic][ic][ia][ia][inb]*g0;
+			complexv G0Saaaa = Mijkl.data5D[ia][ia][ia][ia][inb]*g0;
+			complexv G0Saacc = Mijkl.data5D[ia][ia][ic][ic][inb]*g0;
 
 			// g 1 derivative functions
-			complexv G1Saaac = Mijkl.data5D[ia][ia][ia][ic][inb]*g1; 
-			complexv G1Sccac = Mijkl.data5D[ic][ic][ia][ic][inb]*g1; 
-			complexv G1Scacc = Mijkl.data5D[ic][ia][ic][ic][inb]*g1; 
-			complexv G1Scaaa = Mijkl.data5D[ic][ia][ia][ia][inb]*g1; 
+			complexv G1Saaac = Mijkl.data5D[ia][ia][ia][ic][inb]*g1;
+			complexv G1Sccac = Mijkl.data5D[ic][ic][ia][ic][inb]*g1;
+			complexv G1Scacc = Mijkl.data5D[ic][ia][ic][ic][inb]*g1;
+			complexv G1Scaaa = Mijkl.data5D[ic][ia][ia][ia][inb]*g1;
 
 			// g 2 derivative functions
-			complexv G2Scaac = Mijkl.data5D[ic][ia][ia][ic][inb]*g2; 
-            
+			complexv G2Scaac = Mijkl.data5D[ic][ia][ia][ic][inb]*g2;
+
             complexv cot = coni*(evals.data1D[ic]-evals.data1D[ia])*ti;
-	
+
 			g0 = G1Saaac-G1Sccac +2.0*coni*laccc;
 			g1 = G1Scacc-G1Scaaa +2.0*coni*lcacc;
 			g2 = exp( -G0Saaaa-G0Scccc + G0Sccaa+G0Saacc - 2.0*coni*ti*(lcccc-lccaa)  + cot);
@@ -300,10 +300,10 @@ storage<double> calculator_redfield::GetTransportRatesModRed()
         			cout<<rates.data2D[ia][ib]<<"\t";
         	}
         }
-        
+
     }
-    
-    
+
+
     return rates;
 
 
@@ -312,19 +312,19 @@ storage<double> calculator_redfield::GetTransportRatesModRed()
 
 storage<complexv> calculator_redfield::AddLifetimeDephasings()
 {
-    // here I create redfield rates and 
+    // here I create redfield rates and
     // dephasing constants from mfun
-    
+
     int numG = evals.GetSize();
-        
+
     // number of bath oscillators
     int numBosc = mfun.GetSize();
-    
+
     // next I make dephasings
     if( !dephasings.IsAlloc() )
         dephasings.Allocate(numG,numG);
-    
-    
+
+
     cout<<"# Lifetime dephasing matrix:\n";
     for(int ia = 0; ia<numG; ia++)
         for(int ib = 0; ib<numG; ib++)
@@ -335,7 +335,7 @@ storage<complexv> calculator_redfield::AddLifetimeDephasings()
             {
                 for(int ic=0; ic<numG; ic++)
                 {
-                    
+
                     for(int iosc = 0; iosc<numBosc; iosc++)
                     {
                         // adding off diagonal fluctuations
@@ -361,40 +361,40 @@ storage<complexv> calculator_redfield::AddLifetimeDephasings()
                         }
                     }
                 }
-                
+
                 dephasings.data2D[ia][ib] += value;
-                
-                
+
+
             }
-        
-            
-            
+
+
+
             cout<<value.real()<<" "<<value.imag();
             if(ib==numG-1) cout<<"\n";
             else cout<<"\t";
-            
+
             //cout<<"ia ib: "<<ia<<" "<<ib<<" "<<evals.data1D[ia]<<" "<<evals.data1D[ib]<<" "<<dephasings.data2D[ia][ib]<<"\n";
         }
-   
+
 
     return dephasings;
 }
 
 storage<complexv> calculator_redfield::AddPureDephasings()
 {
-    // here I create redfield rates and 
+    // here I create redfield rates and
     // dephasing constants from mfun
-    
+
     int numG = evals.GetSize();
-    
+
     // number of bath oscillators
     int numBosc = mfun.GetSize();
-    
-    
+
+
     // next I make dephasings
     if( !dephasings.IsAlloc() )
         dephasings.Allocate(numG,numG);
-    
+
     cout<<"# Pure dephasing matrix:\n";
     for(int ia = 0; ia<numG; ia++)
         for(int ib = 0; ib<numG; ib++)
@@ -405,15 +405,15 @@ storage<complexv> calculator_redfield::AddPureDephasings()
             {
                 //for(int ic=0; ic<numG; ic++)
                 //{
-                    
+
                     for(int iosc = 0; iosc<numBosc; iosc++)
                     {
                         // adding off diagonal fluctuations
                     	complexv mfunv = mfun.data1D[iosc].Get(0);
-                       
-                        value 
+
+                        value
                             += gij.data3D[ia][ia][iosc]*mfunv;
-                        
+
                         value
                             += gij.data3D[ib][ib][iosc]*mfunv.conjugate();
 
@@ -421,13 +421,13 @@ storage<complexv> calculator_redfield::AddPureDephasings()
                             -= 2.0*gij.data3D[ib][ia][iosc]*mfunv.real();
                     }
                 //}
-                
+
                 dephasings.data2D[ia][ib] += value;
             }
-            
-            
-            
-            
+
+
+
+
             cout<<value.real()<<" "<<value.imag();
             if(ib==numG-1)
                 cout<<"\n";
@@ -435,11 +435,11 @@ storage<complexv> calculator_redfield::AddPureDephasings()
                 cout<<"\t";
 
         }
-    
-    
+
+
     return dephasings;
 
-    
+
 }
 
 storage<complexv> calculator_redfield::GetRelaxationSuperoperatorM(int block)
@@ -457,24 +457,24 @@ storage<complexv> calculator_redfield::GetRelaxationSuperoperatorM(int block)
         cout<<"Error: calculator_redfield::GetRelaxationSuperoperatorM(): eigenvalues are missing\n";
         return supermatrix;
     }
-    
+
     if(!Mijkl.IsAlloc())
     {
         cout<<"Error: calculator_redfield::GetRelaxationSuperoperatorM(): fluctuation matrix is missing\n";
         return supermatrix;
     }
-    
+
     // number of bath oscillators
     int numBosc = mfun.GetSize();
 
-    
-    
-    
-    
+
+
+
+
     // calculating reorganization energies from M (if necessary)
     // calculaTING REOGANIZATION functions
     if(!reorganizations.IsAlloc())
-    { 
+    {
         int num = evals.GetSize();
         reorganizations.Allocate(num,num);
         cout<<"# reorganization energies:\n";
@@ -498,59 +498,59 @@ storage<complexv> calculator_redfield::GetRelaxationSuperoperatorM(int block)
                     cout<<reorganizations.data2D[ind][inr]<<"\t";
             }
     }
-    
+
     int numL,numR,shL,shR;
     if(block == 0)
-    {    
+    {
         numL = numG;
         numR = numG;
         shL = 0;
         shR = 0;
     }
     else if(block == 10)
-    {    
+    {
         numL = numE;
         numR = numG;
         shL = numG;
         shR = 0;
     }
     else if(block == 11)
-    {    
+    {
         numL = numE;
         numR = numE;
         shL = numG;
         shR = numG;
     }
     else if(block == 20)
-    {    
+    {
         numL = numF;
         numR = numG;
         shL = numG+numE;
         shR = 0;
     }
     else if(block == 21)
-    {    
+    {
         numL = numF;
         numR = numE;
         shL = numG+numE;
         shR = numG;
     }
     else if(block == 22)
-    {    
+    {
         numL = numF;
         numR = numF;
         shL = numG+numE;
         shR = numG+numE;
     }
     else if(block == 123123)
-    {    
+    {
         numL = numG+numE+numF;
         numR = numG+numE+numF;
         shL = 0;
         shR = 0;
     }
 
-    
+
     supermatrix.Allocate(numL,numR,numL,numR);
     if (flagLindblad == 1) return GetRelaxationSuperoperatorLindblad1(block);
 
@@ -603,56 +603,56 @@ storage<complexv> calculator_redfield::GetRelaxationSuperoperatorM(int block)
     return supermatrix;
 }
 
-storage<complexv> 
+storage<complexv>
 calculator_redfield::GetRelaxationSuperoperatorLindblad1(int block)
 // scheme based on proper relaxation rates
 {
 
     int numL,numR,shL,shR;
     if(block == 0)
-    {    
+    {
         numL = numG;
         numR = numG;
         shL = 0;
         shR = 0;
     }
     else if(block == 10)
-    {    
+    {
         numL = numE;
         numR = numG;
         shL = numG;
         shR = 0;
     }
     else if(block == 11)
-    {    
+    {
         numL = numE;
         numR = numE;
         shL = numG;
         shR = numG;
     }
     else if(block == 20)
-    {    
+    {
         numL = numF;
         numR = numG;
         shL = numG+numE;
         shR = 0;
     }
     else if(block == 21)
-    {    
+    {
         numL = numF;
         numR = numE;
         shL = numG+numE;
         shR = numG;
     }
     else if(block == 22)
-    {    
+    {
         numL = numF;
         numR = numF;
         shL = numG+numE;
         shR = numG+numE;
     }
     else if(block == 123123)
-    {    
+    {
         numL = numG+numE+numF;
         numR = numG+numE+numF;
         shL = 0;
@@ -665,7 +665,7 @@ calculator_redfield::GetRelaxationSuperoperatorLindblad1(int block)
     int numBosc = mfun.GetSize();
 
     int num = numG+numE+numF;
-    
+
 	// calculating supermatrix Zabcd - the Lindblad correlation supermatrix
         // from Redfield-like relations
     storage<complexv> zabcd(4);
@@ -690,7 +690,7 @@ calculator_redfield::GetRelaxationSuperoperatorLindblad1(int block)
         double omegaij = evals.data1D[id]-evals.data1D[ib];
 // 		//omegaij = evals.data1D[id]-evals.data1D[ib] -reorganizations.data2D[id][id] + reorganizations.data2D[ib][ib];
         complexv value1 = mfun.data1D[iosc].Get(omegaij);
-                
+
  		omegaij = evals.data1D[ic]-evals.data1D[ia];
 // 		//omegaij = evals.data1D[ic]-evals.data1D[ia] -reorganizations.data2D[ic][ic] + reorganizations.data2D[ia][ia];
  		complexv value2 = mfun.data1D[iosc].Get(omegaij);
@@ -717,7 +717,7 @@ calculator_redfield::GetRelaxationSuperoperatorLindblad1(int block)
 // 		omegaij = evals.data1D[id]-evals.data1D[ib];
 // 		//omegaij = evals.data1D[id]-evals.data1D[ib] -reorganizations.data2D[id][id] + reorganizations.data2D[ib][ib];
 // 		value1 += Mijkl.data5D[id][ib][ia][ic][iosc]*mfun.data1D[iosc].Get(omegaij);
-                
+
 // 		omegaij = evals.data1D[ic]-evals.data1D[ia];
 // 		//omegaij = evals.data1D[ic]-evals.data1D[ia] -reorganizations.data2D[ic][ic] + reorganizations.data2D[ia][ia];
 // 		value2 += Mijkl.data5D[id][ib][ia][ic][iosc]*mfun.data1D[iosc].Get(omegaij);
@@ -740,7 +740,7 @@ calculator_redfield::GetRelaxationSuperoperatorLindblad1(int block)
 //	            zabcd.data4D[ib][id][ia][ic] = sqrt(zabcd.data4D[ib][id][ib][id]*zabcd.data4D[ia][ic][ia][ic]);
 //		}
 
-    
+
 	// calculating relaxation supermatrix from the Lindblad correlation supermatrix
     for(int ia = 0; ia<numL; ia++)
         for(int ib = 0; ib<numR; ib++)
@@ -749,7 +749,7 @@ calculator_redfield::GetRelaxationSuperoperatorLindblad1(int block)
         {
             complexv value = 0.0;
 
-                    if(ib == id)                    
+                    if(ib == id)
                 	for(int ie=0; ie<numL; ie++)
 			value = value - 0.5*zabcd.data4D[ie+shL][ia+shL][ie+shL][ic+shL];
 
@@ -789,11 +789,11 @@ void calculator_redfield::AddMijkl(storage<double>& iM)
 
 // Schrodinger picture Redfield memory kernel
 storage<complexv> calculator_redfield::GetMemoryKernel(double time, double& deltat, int& numT, int block)
-// block should be 
+// block should be
 // 0, 10, 11, 20, 21, 22
 {
 
-    
+
 //    if(!kernel.IsAlloc())
 //    {
         //cout<<"Error: calculator_redfield::GetMemoryKernelInteraction: kernel must be allocated\n";
@@ -805,7 +805,7 @@ storage<complexv> calculator_redfield::GetMemoryKernel(double time, double& delt
         cout<<"Error: calculator_redfield::SetupMemoryKernel: eigenvalues are missing\n";
         return kernel;
     }
-    
+
     if(!Mijkl.IsAlloc())
     {
         cout<<"Error: calculator_redfield::SetupMemoryKernel: fluctuation matrix is missing\n";
@@ -827,49 +827,49 @@ storage<complexv> calculator_redfield::GetMemoryKernel(double time, double& delt
 
     int numL,numR,shL,shR;
     if(block == 0)
-    {    
+    {
         numL = numG;
         numR = numG;
         shL = 0;
         shR = 0;
     }
     else if(block == 10)
-    {    
+    {
         numL = numE;
         numR = numG;
         shL = numG;
         shR = 0;
     }
     else if(block == 11)
-    {    
+    {
         numL = numE;
         numR = numE;
         shL = numG;
         shR = numG;
     }
     else if(block == 20)
-    {    
+    {
         numL = numF;
         numR = numG;
         shL = numG+numE;
         shR = 0;
     }
     else if(block == 21)
-    {    
+    {
         numL = numF;
         numR = numE;
         shL = numG+numE;
         shR = numG;
     }
     else if(block == 22)
-    {    
+    {
         numL = numF;
         numR = numF;
         shL = numG+numE;
         shR = numG+numE;
     }
     else if(block == 123123)
-    {    
+    {
         numL = numG+numE+numF;
         numR = numG+numE+numF;
         shL = 0;
@@ -925,11 +925,11 @@ storage<complexv> calculator_redfield::GetMemoryKernel(double time, double& delt
 		        for(int io=0;io<numosc;io++)
 			R3 += exp(cnni*omegat*tau)*Mijkl.data5D[ia+shL][ia1+shL][ib1+shR][ib+shR][io]*cfun.data1D[io].Get(tau);
 		}
-	
-        if(it==0)
-            kernel.data5D[it][ia][ib][ia1][ib1] = -(R1-R2-R3+R4)/2.0;
+
+        //if(it==0)
+        //    kernel.data5D[it][ia][ib][ia1][ib1] = -(R1-R2-R3+R4)/2.0;
             // this is needed for integration by trapecia
-        else
+        //else
             kernel.data5D[it][ia][ib][ia1][ib1] = -(R1-R2-R3+R4);
       }
     }
@@ -940,20 +940,20 @@ storage<complexv> calculator_redfield::GetMemoryKernel(double time, double& delt
 //    for(int it=0;it<numT;it++)
 //    cout<<cfun.data1D[0].Get(deltat*it)<<"\n";
 
-    cout<<"Kernel specific element kernel.data5D[it][1][1][2][2]\n";
-    cout<<"Mijkl.data5D[1][2][2][1][0] = "<<Mijkl.data5D[1+1][2+1][2+1][1+1][0]<<"\n";
-    cout<<"dt = "<<deltat<<"\n";
-    for(int it=0;it<numT;it++)
-    cout<<kernel.data5D[it][1][1][2][2]<<"\n";
-        
+    // cout<<"Kernel specific element kernel.data5D[it][1][1][2][2]\n";
+    // cout<<"Mijkl.data5D[1][2][2][1][0] = "<<Mijkl.data5D[1+1][2+1][2+1][1+1][0]<<"\n";
+    // cout<<"dt = "<<deltat<<"\n";
+    // for(int it=0;it<numT;it++)
+    // cout<<kernel.data5D[it][1][1][2][2]<<"\n";
+
     return kernel;
-            
+
 }
 
 ////////////////////////////
 // the factorized form of the memory kernel (without cfun)
 storage<complexv> calculator_redfield::GetMemoryKern(int block)
-// block should be 
+// block should be
 // 0, 10, 11, 20, 21, 22
 {
 
@@ -967,21 +967,21 @@ storage<complexv> calculator_redfield::GetMemoryKern(int block)
 
     int numL,numR,shL,shR;
     if(block == 0)
-    {    
+    {
         numL = numG;
         numR = numG;
         shL = 0;
         shR = 0;
     }
     else if( (block == 10) || (block == 11) )
-    {    
+    {
         numL = numE+numG;
         numR = numE+numG;
         shL = 0;
         shR = 0;
     }
-    else 
-    {    
+    else
+    {
         numL = numF+numE+numG;
         numR = numF+numE+numG;
         shL = 0;
@@ -1000,9 +1000,9 @@ storage<complexv> calculator_redfield::GetMemoryKern(int block)
 
     for(int io=0;io<cfun.GetSize();io++)
         retM.data3D[io][ia*numL+ia1][ib*numR+ib1] =  Mijkl.data5D[ia][ia1][ib][ib1][io];
-        
+
     return retM;
-            
+
 }
 
 
@@ -1016,23 +1016,21 @@ void calculator_redfield::Setup()
     // system parameters
     evals.SetDimension(1);
 
-    rates.SetDimension(2);    
+    rates.SetDimension(2);
     dephasings.SetDimension(2);
     reorganizations.SetDimension(2);
-    
-    mfun.SetDimension(1); // for a set of spectral densities 
-    cfun.SetDimension(1); // for a set of spectral densities 
+
+    mfun.SetDimension(1); // for a set of spectral densities
+    cfun.SetDimension(1); // for a set of spectral densities
     gij.SetDimension(3); // amplitudes for all pairs
     kij.SetDimension(3); // amplitudes for all pairs
     Mijkl.SetDimension(5); // Hilbert notation is used
 
     supermatrix.SetDimension(4); // Hilbert notation is used
-    kernel.SetDimension(5); // 
+    kernel.SetDimension(5); //
     // transport rates:
 
     flagLindblad = 0;
 	tempr = 0;
 	//nonsecular = 0;
 }
-
-
