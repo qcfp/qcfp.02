@@ -19,13 +19,13 @@ using std::setprecision;
 numericalSD::numericalSD()
 {
     constants cc;
-    
+
     const0_695 = 1.0;
     const5305 = 1.0;
     const3000 = cc.pi2*const5305;
 
     temperature = 0;
-    
+
     spectral_density = 0;
 	accessory_a1P = 0;
 	accessory_a2P = 0;
@@ -40,40 +40,40 @@ numericalSD::numericalSD()
 numericalSD::numericalSD( double dtemperature)
 {
     constants cc;
-    
+
     const0_695 = 1.0;
     const5305 = 1.0;
     const3000 = cc.pi2*const5305;
-    
+
     temperature = const0_695*dtemperature;
-    
+
     spectral_density = 0;
     accessory_a1P = 0;
     accessory_a2P = 0;
     accessory_a3P = 0;
     lineshape = 0;
-    
-    
+
+
     globalgamma = 0.0;
     epsilonomega = 0.0;
     flagaccessories = 0;
-    
+
     // reading the sepctral density from file
     //ReadSpectralDensities(file_name);
-    
+
 }
 
 numericalSD::numericalSD( double dtemperature,asymptoticLF<double>& ifun)
 {
     //cout<<"inside SD\n";
     constants cc;
-    
+
     const0_695 = 1.0;
     const5305 = 1.0;
     const3000 = cc.pi2*const5305;
 
     temperature = const0_695*dtemperature;
-    
+
     spectral_density = 0;
 	accessory_a1P = 0;
 	accessory_a2P = 0;
@@ -84,11 +84,11 @@ numericalSD::numericalSD( double dtemperature,asymptoticLF<double>& ifun)
     epsilonomega = 0.0;
     flagaccessories = 0;
 
-	
+
    Allocate_spectral_density();
     *spectral_density = ifun;
     spectral_density->causality = 3; // odd function
-    
+
 	int numv = 2*spectral_density->GetN();
 	double xmax = 2*spectral_density->GetXF(); // cm-1
 	epsilonomega = xmax/numv/50; // cm-1
@@ -106,23 +106,23 @@ void numericalSD::updateUnits(string istring)
 
     // reconverting temperature
 	temperature = temperature/const0_695;
-    
+
     if(istring == "default")
     {
-        
+
         const0_695 = 1.0;
         const5305  = 1.0;
         const3000 = cc.pi2*const5305;
     }
     else if(istring == "cm-fs-K")
     {
-    
+
         const0_695 = cc.bkTc;
         const5305  = cc.c_cmfs_i;
         const3000 = cc.pi2*const5305;
     }
-    
-    
+
+
     // converting temperature
 	temperature = temperature*const0_695;
 }
@@ -146,14 +146,14 @@ numericalSD::~numericalSD()
 
 void numericalSD::Allocate_spectral_density()
 {
-	// here we allocate empty spectral densities 
-	// we use it only for positive time 
+	// here we allocate empty spectral densities
+	// we use it only for positive time
 	// because for negative time is essentially symmetric
 
 	if(spectral_density == NULL)
 		spectral_density = new asymptoticLF<double>;
 
-	else 
+	else
 		cout<<"Error: error with spectral density\n";
 }
 
@@ -168,7 +168,7 @@ void numericalSD::AllocateAccessoryFunction()
 		accessory_a3P = new asymptoticLF_complexv;
 
 	}
-	else 
+	else
 	{
 		cout<<"Error: error with spectral density\n";
 	}
@@ -181,7 +181,7 @@ void numericalSD::AllocateLineshape()
 		lineshape = new asymptoticLF_complexv;
         lineshape->SetCausality(2,3); // causal function
 	}
-	else 
+	else
 	{
 		cout<<"Error: error with spectral density\n";
 	}
@@ -234,11 +234,11 @@ void numericalSD::SetSD(double* idat,double dx,int nump)
 {
    	if(spectral_density == NULL)
 		Allocate_spectral_density();
-        
+
         storage<double> tdat(1);
         tdat.Allocate(nump);
         idat = tdat.FlipBar(idat);
- 
+
 	*spectral_density = asymptoticLF<double>(tdat,0,dx);//MakeFromDataset(idat,dx,nump);
         idat = tdat.FlipBar(idat);
         tdat.Delete();
@@ -325,11 +325,11 @@ void numericalSD::ReadCfun(string inp_file)
                 asymptoticLF<double> spdens;
                 interpolationF<double> spdensRd;
                 spdensRd.ReadF(&inp_file_str);
-                
+
                 // now I have an interpolation function - which is the correlation function
                 int nump = spdensRd.GetN();
                 double step = spdensRd.GetStep(); // this guy is in outer units
-                
+
                 // 1-st step : making the C' function; converting units
                 interpolationF<complexv> ifun(0.0,step/const5305,2*nump);
                 complexv* hifun = ifun.DirectAccessD();
@@ -340,7 +340,7 @@ void numericalSD::ReadCfun(string inp_file)
                     hifun[ind]=hspdensRd[ind];
                     hifun[2*nump-ind]=hifun[ind];
                 }
-                
+
                 toolsFFT tfft;
                 interpolationF<complexv> c1 = tfft.executeN(ifun);
                 hifun = c1.DirectAccessD();
@@ -352,7 +352,7 @@ void numericalSD::ReadCfun(string inp_file)
                     hspdensRd[ind]=(hifun[ind]).real()*step/const5305*tanh(ind*wstep/temperature/2.0);
                 }
                 spdensRd.UpdateAxis(0,wstep);
-                
+
                 spdens = spdensRd;
                 spdens.causality = 3;
 
@@ -378,7 +378,7 @@ double numericalSD::GetSD(double dfreq)
         cout<<"ERROR in numericalSD: spectral density is empty\n";
         return 0;
     }
-    
+
     // this function accepts just real frequencies
 	//double sign = 1.0;
 	//double val;
@@ -389,27 +389,27 @@ double numericalSD::GetSD(double dfreq)
 	//}
     //    if(dfreq > (spectral_density->GetXF()-spectral_density->GetXF()/spectral_density->GetN()) )
     //        return 0;
-	
+
 	// dfreq is always positive
     //val = spectral_density->Get(dfreq);
 	//return sign*val;
-    
+
     return spectral_density->Get(dfreq);
 }
 
 complexv numericalSD::GetMf(double omega)
 {
-    
-	
+
+
     if(accessory_a1P == NULL)
         ConstructAccessoryFunction();
 	// numerical form of M function must be created
 
-    
-    
+
+
     // this function takes some default values and calculates spectral density integrals
     double valuer;
-	
+
 
 	int numv = 2*spectral_density->GetN();
 	double xmax = 2*spectral_density->GetXF(); // cm-1
@@ -422,13 +422,13 @@ complexv numericalSD::GetMf(double omega)
 	if(fabs(omega)<0.001*deltav)
 		valuer = kT*GetSD(deltav)/deltav;
 	else if(fabs(100*omega)<kT)
-		valuer = 0.5*GetSD(omega)*(2*kT/omega + 1); 
+		valuer = 0.5*GetSD(omega)*(2*kT/omega + 1);
 	else
         valuer = 0.5*GetSD(omega)*(1.0/tanh(0.5*omega/kT)+1.0);
 
-    
+
    //imaginary part
-    
+
 
 	return complexv(valuer, M_BAR_im.Get(omega));
 
@@ -448,23 +448,23 @@ complexv numericalSD::GetMfp(double omega)
 
 complexv numericalSD::GetGfD(double t, int n)
 {
-	// this function returns derivatives of the lineshape function 
+	// this function returns derivatives of the lineshape function
 	// input time is in outer units
-	// output is 
+	// output is
 	//    n=0: dimensionless
 	//    n=1: cm-1
 	//    n=2: cm-2
-	// n-th (1 and 2) derivative 
+	// n-th (1 and 2) derivative
 
 	if(accessory_a1P == NULL)
 		ConstructAccessoryFunction();
 	if(lineshape == NULL)
 		CreateLineshape();
-    
+
     t=t/const5305;
 
 	double tempt=fabs(t);
-	
+
 	complexv result;
 
 	if(n==0) return GetGf(t);
@@ -487,14 +487,14 @@ complexv numericalSD::GetGfD(double t, int n)
 		else
 			return conj(result);
 	}
-	else 
+	else
 	{
 		cout<<"error: only up to second derivative is available\n";
 		return 0.0;
 	}
 }
 
-// returns lineshape function 
+// returns lineshape function
 complexv numericalSD::GetGf(double t)
 {
     t=t/const5305;
@@ -527,7 +527,7 @@ complexv numericalSD::GetGfA(double t)
 			-accessory_a1P->Get(tempt)
 			-coni*accessory_a2P->Get(0)*tempt/const5305;
 
-        
+
     if(t<0.0) return conj(gfun);
 	else return gfun;
 }
@@ -537,12 +537,12 @@ complexv numericalSD::GetGfA(double t)
 
 complexv numericalSD::GetGfD1Inf()
 {
-    
+
 //    cout<<"Fix here to use M-funcion\n";
     //cout<<"mfun: "<< GetMf(0)<<"\n";
     return GetMf(0);
-    
-    
+
+
     // temporary functions
     //asymptoticLF<double>* rep = lineshape->DirectAccessRE();
     //double vr = rep->a;
@@ -550,7 +550,7 @@ complexv numericalSD::GetGfD1Inf()
     //double vi = rep->a;
     //cout<<"afun: "<< complexv(vr,vi)<<"\n";
     //return complexv(vr,vi);
-    
+
 }
 
 
@@ -567,11 +567,11 @@ void  numericalSD::CreateLineshape()
         AllocateLineshape();
     else
         return;
-    
-    
+
+
     if(accessory_a1P == NULL)
         ConstructAccessoryFunction();
-    
+
     complexv* gfun = 0;
     int numt=0;
     double deltat=0;
@@ -587,14 +587,14 @@ void  numericalSD::CreateLineshape()
         //	complexv gfun = accessory_a1P->GetValueApproach("0")
         //			-accessory_a1P->GetValueApproach(tempt)
         //			-coni*accessory_a2P->GetValueApproach("0")*tempt/const5305;
-        
+
         //	// using direct lineshape
         //	complexv gfun = lineshape->Get(tempt);
         //
         //        if(t<0.0) return conj(gfun);
         //	else return gfun;
-        
-        
+
+
         // update
         numt = accessory_a3P->GetN();
         double tmax = accessory_a3P->GetXF();
@@ -604,7 +604,7 @@ void  numericalSD::CreateLineshape()
 
         complexv lam = -coni*accessory_a2P->Get(0)*deltat;
         gfun = new complexv[numt+4];
-        
+
         for(int id = 0; id<numt+4; id++)
             gfun[id] = accessory_a1P->Get(0)-accessory_a1P->Get(id*deltat)+lam*((double)id);
 
@@ -613,57 +613,57 @@ void  numericalSD::CreateLineshape()
     }
     else
     {
-    
+
         // accessory is now used only for the correlation function
-        
+
         cout<<"Creating lineshape function: direct integration\n";
-        
+
         int numv = spectral_density->GetN();
-        
+
         // Using smart integration of the time correlation function
-        
+
         int factor = 1;
-        
+
         numt = factor*numv;
         double vmax = factor*spectral_density->GetXF(); // cm-1
-        
+
         double deltav = vmax/numt; // cm-1
         deltat = const3000/(2*vmax); // cm  = 2*pi*1
-        
+
         double dt2 = deltat*deltat;
-        
+
         gfun = new complexv[numt+4];
         complexv* Cort = new complexv[numt+4];
         complexv  cval;
-        
+
         // assigning gfun:
         for(int ind=0;ind<numt+4;ind++)
             Cort[ind]=GetCf(ind*deltat);
-        
-        
+
+
         // beginning the iterative integration
         gfun[0] = 0.0;
-        
+
         for( int indi = 1; indi < numt+4; indi++)
         {
             //  calculating Zn
             cval =  0.5*Cort[0];
-            
+
             for(int indj = 1; indj < indi-1; indj++) //(* first integral positive *)
                 cval +=  Cort[indj];
-            
-            
+
+
             cval +=  Cort[indi-1]*0.875;
-            
+
             cval +=  Cort[indi]*0.125;
-            
+
             gfun[indi] = cval*dt2+gfun[indi-1];
         }
         //(* that was only positive time part - negative will be conjugate *)
-        
+
         delete[] Cort;
-        
-        
+
+
         //        cout<<numt<<" test\n";
     }
 
@@ -694,7 +694,7 @@ void  numericalSD::CreateLineshape()
     lineshape->SetCausality(2,3);
     tgfun.Delete();
     delete[] gfun;
-    
+
     //GetGfD1Inf();
 
 }
@@ -727,11 +727,11 @@ void  numericalSD::ConstructAccessoryFunction()
 	// Using FFT to create time domain functions
         // a1 and a2 will have small time step
         // function a3 will have timestep consistent with fft
-        
+
     // 6 times longer FFT - from experience
     // no smaller than 2
     // int fact = 1; // 6;
-        
+
     // basic length is from the spectral density
     int numv = spectral_density->GetN();
 	double vmax = spectral_density->GetXF(); // cm-1
@@ -740,7 +740,7 @@ void  numericalSD::ConstructAccessoryFunction()
     // including negative, we must have at least 2*
     int numt = 2*numv;
     double deltat = const3000/(2*vmax); // fs  = 2*pi*5305
-        
+
 	double* dummySD = new double[numt];// double length
 	double* dummyPP = new double[numt];// double length
 
@@ -752,18 +752,18 @@ void  numericalSD::ConstructAccessoryFunction()
 	complexv* funa2 = new complexv[numt];
 	complexv* funa3 = new complexv[numt];
     complexv* times = new complexv[numt];
-    
+
     // arrays funax include the negative part of the time as well
 
         //cout<<funa1[0]<<"\n";
         //cout<<funa1[1]<<"\n";
         //cout<<funa1[2]<<"\n";
 
-    
+
     for(int ind = 0; ind<numt; ind++)
         times[ind] = deltat*ind;
-    
-    
+
+
 
     if(flagaccessories == 1)
     {
@@ -795,7 +795,7 @@ void  numericalSD::ConstructAccessoryFunction()
             complexv c0 = funa3[ind+1]*0.5*idel*times[ind-1]*times[ind];
             c0 += -funa3[ind]*idel*times[ind-1]*times[ind+1];
             c0 += funa3[ind-1]*0.5*idel*times[ind]*times[ind+1];
-        
+
             complexv c1 = -funa3[ind+1]*0.5*idel*(times[ind-1]+times[ind]);
             c1 += funa3[ind]*idel*(times[ind-1]+times[ind+1]);
             c1 += -funa3[ind-1]*0.5*idel*(times[ind]+times[ind+1]);
@@ -803,9 +803,9 @@ void  numericalSD::ConstructAccessoryFunction()
             complexv c2 = funa3[ind+1]*0.5*idel;
             c2 += -funa3[ind]*idel;
             c2 += funa3[ind-1]*0.5*idel;
-            
+
             funa2[ind]=funa2[ind-1]-coni*(c0*deltat+c1*0.5*(times[ind]*times[ind]-times[ind-1]*times[ind-1])+c2/3.0*(times[ind]*times[ind]*times[ind]-times[ind-1]*times[ind-1]*times[ind-1]) );
-            
+
         }
 
 
@@ -827,31 +827,31 @@ void  numericalSD::ConstructAccessoryFunction()
             cout<<"Whole a2(t) function has been shifted.\n";
         }
 
-    
+
         for(int ind = 1; ind<numv; ind++)
         {
             double idel = 1.0/(deltat*deltat);
             complexv c0 = funa2[ind+1]*0.5*idel*times[ind-1]*times[ind];
             c0 += -funa2[ind]*idel*times[ind-1]*times[ind+1];
             c0 += funa2[ind-1]*0.5*idel*times[ind]*times[ind+1];
-            
+
             complexv c1 = -funa2[ind+1]*0.5*idel*(times[ind-1]+times[ind]);
             c1 += funa2[ind]*idel*(times[ind-1]+times[ind+1]);
             c1 += -funa2[ind-1]*0.5*idel*(times[ind]+times[ind+1]);
-            
+
             complexv c2 = funa2[ind+1]*0.5*idel;
             c2 += -funa2[ind]*idel;
             c2 += funa2[ind-1]*0.5*idel;
-            
+
             funa1[ind]=funa1[ind-1]-coni*(c0*deltat+c1*0.5*(times[ind]*times[ind]-times[ind-1]*times[ind-1])+c2/3.0*(times[ind]*times[ind]*times[ind]-times[ind-1]*times[ind-1]*times[ind-1]) );
-            
-            
+
+
         }
-    
+
     }
-    
-    
-    
+
+
+
 
 	// temporary functions
 	asymptoticLF<double>* rep;// = accessory_a1P.DirectAccessRE();
@@ -859,8 +859,8 @@ void  numericalSD::ConstructAccessoryFunction()
 
     storage<complexv> sfuna(1);
     sfuna.Allocate(numv);
-    
-    
+
+
     // saving the calculated function A1: only positive part numv points
     // storing positive half
     for(int id = 0; id<numv; id++)
@@ -894,7 +894,7 @@ void  numericalSD::ConstructAccessoryFunction()
     accessory_a2P->SetCausality(2,3);
 
 
-	// saving the calculated function A3: only positive part 
+	// saving the calculated function A3: only positive part
 	// for negative part it is symmetric conjugate. Using that to improve accuracy.
     funa3[0] = funa3[0].real();
     for(int id = 0; id<numv; id++)
@@ -913,24 +913,24 @@ void  numericalSD::ConstructAccessoryFunction()
     //cout<<"acc3 "<< accessory_a3P->GetValueApproach(deltat);
     sfuna.Delete();
 
-	delete[] dummySD;// = new double[numt];	
+	delete[] dummySD;// = new double[numt];
 	delete[] dummyPP;// = new double[numt];
     delete[] times;
-    
-    
-    
+
+
+
     GenerateMBARFunction();
-    
+
 }
 
 
 
 void numericalSD::GenerateAccessoryArrays(
-double* dummySD, double* dummyPP, 
+double* dummySD, double* dummyPP,
 complexv* funa1, complexv* funa2, complexv* funa3,
 int numt,double deltav)
 {
-    
+
     // creates positive and negative parts consistent with FFT
 
 	// at zero point adds small imaginary shift to keep convergence
@@ -965,7 +965,7 @@ int numt,double deltav)
 		dataIn[indv] = complexv( dummySD[indv]/dindv/dindv, 0.0);
                 //cout<<dataIn[indv]<<" ---\n";
         }
-        
+
         fplan.executeP(dataOu,dataIn,numt);
 
 	// saving the calculated first part to function A1
@@ -1020,7 +1020,7 @@ int numt,double deltav)
 		dataIn[indv] = complexv(dummySD[indv]/dindv, 0.0);
 	}
         fplan.executeP(dataOu,dataIn,numt);
-	
+
         // saving  data
 	for(int indt = 0; indt < numt; indt ++)
 		funa2[indt] = dataOu[indt]*deltav/cc.pi2;
@@ -1043,7 +1043,7 @@ int numt,double deltav)
         // saving the remaining calculated function A2
         for(int indt = 0; indt < numt; indt ++)
                 funa2[indt] += dataOu[indt]*deltav/cc.pi2;
-	
+
 	}// done with function a2
 
 	if(funa3 != NULL){
@@ -1075,23 +1075,23 @@ int numt,double deltav)
 
 void numericalSD::GenerateMBARFunction()
 {
-    
+
     // doing numerical integrations
-    
+
     // frequency parameters
     int numv = 2*spectral_density->GetN();
     double vmax =  2*spectral_density->GetXF();//    deltav*numv;
     double deltav = vmax/numv;
-    
-    
+
+
     storage<double> td(1);
     td.Allocate(numv);
-    
+
 //    double dummy1 = 1.0/2.0/temperature;
 //    for(int find = 0; find<numv; find++)
 //    {
 //        double omegac = -deltav*numv/2 + deltav*find;
-//        
+//
 //        // now this funny summation
 //        int summation = 100;
 //        double sumerror = 1e64;
@@ -1115,29 +1115,29 @@ void numericalSD::GenerateMBARFunction()
 //            double indninv = 1.0/(double)indn;
 //            sumerror = indninv*(-coth+cotl);
 //            sumval += sumerror;
-//            
+//
 //            indn ++;
-//            
+//
 //        }
-//        
+//
 //        td.data1D[find] = sumval;
 //    }
 //    M_BAR_im =  asymptoticLF<double>(td,-deltav*numv/2,deltav, 0, 0, 0);
-//    
+//
 //    return;
-//    
+//
     // otherwise
     // this must be done using Fourier transformations
-        
+
 	// M function is just a positive time Fourier transform of the accessory function A3
     // since a3 is the time domain correlation function
 
 	// using accessory functions if available (this is one of the most accurate and fastest numerical results
 
-    
+
     // the FFT dataset must be twice the length of the correlation function
     // since only the positive half of the correlation function is stored
-    
+
     // FFT
     // time parameters
 	int numt = numv;
@@ -1150,7 +1150,7 @@ void numericalSD::GenerateMBARFunction()
 	toolsFFT fplan;
 
         // creating the dataset for FFT
-        
+
     // positive time part
 	for(int indt = 0; indt < numt/2; indt ++)
 	{
@@ -1175,7 +1175,7 @@ void numericalSD::GenerateMBARFunction()
         td.data1D[indt-numv/2] = dataOu[indt].imag()*deltat;
 
     M_BAR_im =  asymptoticLF<double>(td,-deltav*numv/2,deltav, 0, 0, 0);
-	
+
 	delete[] dataIn;
 	delete[] dataOu;
 
@@ -1186,7 +1186,7 @@ void numericalSD::CreateSymmetricFDCorrelation(double* sfSSD,double* gfuSD,doubl
 {
 	// this function generates the symmetric part of the frequency domain
 	// correlation function from numerical spectral density gfuSD
-	
+
 	double dummy1 = 1.0/2.0/temperature;
         int numt2 = numt/2;
 
@@ -1243,31 +1243,32 @@ void numericalSD::printMBAR(string fname)
     numv *=2;
 
     ofstream* file_str = new ofstream(fname.c_str());
-    
+
     if(!file_str->is_open())
         cout<<"Error in numericalSD::printACCESSORY(string fname): "<<fname<<" file cannot been openned.\n";
     else
     {
         cout<<"Writing M(t) function\n";
-        
+
         complexv val_s = 0.0;
-        
+
         // in the file
-        
+				file_str->precision(16);
+
         *(file_str) << "# M(t), function of omega\n";
-        
+
         for(int indd=0;indd<numv;indd++)
         {
             double time;
             time= -xmax+indd*deltav;
-            
+
             complexv val_s = GetMf(time);
-            *(file_str)<< setprecision(9) << time;
+            *(file_str) << time;
             *(file_str) << "\t";
-            *(file_str)<< setprecision(9) << val_s.real();
+            *(file_str) << val_s.real();
             *(file_str) << "\t";
-            
-            *(file_str)<< setprecision(9) << val_s.imag();
+
+            *(file_str) << val_s.imag();
             *(file_str) << "\n";
         }
         file_str->close();
@@ -1285,7 +1286,7 @@ void numericalSD::printACCESSORY(string fname)
 
     asymptoticLF<double>* rep;// = accessory_a1P.DirectAccessRE();
 	rep = accessory_a1P->DirectAccessRE();
-	int numt = rep->GetN(); 
+	int numt = rep->GetN();
         //cout<<numt<<"\n";
 	double tmax = rep->GetXF();
 	double deltat = tmax/numt;
@@ -1299,12 +1300,13 @@ void numericalSD::printACCESSORY(string fname)
 		cout<<"Writing a1(t), a2(t), a3(t) functions; units are forced to be the standard ones\n";
 
 		complexv val_s = 0.0;
-				
-		// in the file 
+
+		// in the file
 		// the 1 number is the number of data points
 		// the 2 number is the frequency step
 		// the data then follows
 
+		file_str->precision(16);
 
 		*(file_str) << "# a1(t), a2(t), a3(t) functions of time; units are forced to be the standard ones\n";
 
@@ -1313,25 +1315,25 @@ void numericalSD::printACCESSORY(string fname)
 			double time;
 			time= indd*deltat;
 
-            *(file_str)<< setprecision(9) << time;
+            *(file_str) << time;
             *(file_str) << "\t";
 
             val_s = accessory_a1P->Get(time);
-			*(file_str)<< setprecision(9) << val_s.real();
+			*(file_str)<< val_s.real();
 			*(file_str) << "\t";
-			*(file_str)<< setprecision(9) << val_s.imag();
+			*(file_str)<< val_s.imag();
 			*(file_str) << "\t";
 
 			val_s = accessory_a2P->Get(time);
-			*(file_str)<< setprecision(9) << val_s.real();
+			*(file_str)<< val_s.real();
 			*(file_str) << "\t";
-			*(file_str)<< setprecision(9) << val_s.imag();
+			*(file_str)<< val_s.imag();
 			*(file_str) << "\t";
 
 			val_s = accessory_a3P->Get(time);
-			*(file_str)<< setprecision(9) << val_s.real();
+			*(file_str)<< val_s.real();
 			*(file_str) << "\t";
-			*(file_str)<< setprecision(9) << val_s.imag();
+			*(file_str)<< val_s.imag();
 			*(file_str) << "\n";
 		}
                 file_str->close();
@@ -1354,12 +1356,12 @@ void numericalSD::printGFUN(string fname)
 	int numt = rep->GetN();
 	double tmax = rep->GetXF();
 	double deltat = tmax/numt;
-        
+
         //cout<<numt<<"\n";
         //cout<<tmax<<"\n";
         //cout<<deltat<<"\n";
 
-	
+
 	ofstream* file_str = new ofstream(fname.c_str());
 
 	if(!file_str->is_open())
@@ -1369,12 +1371,13 @@ void numericalSD::printGFUN(string fname)
 		cout<<"Writing g(t) function of time\n";
 
 		complexv val_s = 0.0;
-				
-		// in the file 
+
+		// in the file
 		// the 1 number is the number of data points
 		// the 2 number is the frequency step
 		// the data then follows
 
+		file_str->precision(16);
 
 		*(file_str) << "# g(t) function of time\n";
 
@@ -1383,13 +1386,13 @@ void numericalSD::printGFUN(string fname)
 			double time;
 			time= indd*deltat;
 
-            *(file_str)<< setprecision(9) << time*const5305;
+            *(file_str)<< time*const5305;
             *(file_str) << "\t";
 
             val_s = GetGf(time);
-			*(file_str)<< setprecision(9) << val_s.real();
+			*(file_str)<< val_s.real();
 			*(file_str) << "\t";
-			*(file_str)<< setprecision(9) << val_s.imag();
+			*(file_str)<< val_s.imag();
 			*(file_str) << "\n";
 		}
                 file_str->close();
@@ -1411,7 +1414,7 @@ void numericalSD::printGDERIV1(string fname)
 	double tmax = rep->GetXF();
 	double deltat = tmax/numt;
 
-	
+
 	ofstream* file_str = new ofstream(fname.c_str());
 
 	if(!file_str->is_open())
@@ -1421,13 +1424,14 @@ void numericalSD::printGDERIV1(string fname)
 		cout<<"Writing g'(t) functions\n";
 
 		complexv val_s = 0.0;
-				
-		// in the file 
+
+		// in the file
 		// the 1 number is the number of data points
 		// the 2 number is the frequency step
 		// the data then follows
 
 
+		file_str->precision(16);
 		*(file_str) << "# g'(t) function of time\n";
 
 		for(int indd=0;indd<numt;indd++)
@@ -1435,13 +1439,13 @@ void numericalSD::printGDERIV1(string fname)
 			double time;
 			time= indd*deltat;
 
-            *(file_str)<< setprecision(9) << time*const5305;
+            *(file_str)<< time*const5305;
             *(file_str) << "\t";
 
 			val_s = GetGfD(time,1);
-			*(file_str)<< setprecision(9) << val_s.real();
+			*(file_str)<< val_s.real();
 			*(file_str) << "\t";
-			*(file_str)<< setprecision(9) << val_s.imag();
+			*(file_str)<< val_s.imag();
 			*(file_str) << "\n";
 		}
                 file_str->close();
@@ -1465,7 +1469,7 @@ void numericalSD::printGDERIV2(string fname)
         //cout<<deltat<<" test\n";
 
 
-	
+
 	ofstream* file_str = new ofstream(fname.c_str());
 
 	if(!file_str->is_open())
@@ -1475,13 +1479,14 @@ void numericalSD::printGDERIV2(string fname)
 		cout<<"Writing g''(t)===C(t) function of time\n";
 
 		complexv val_s = 0.0;
-				
-		// in the file 
+
+		// in the file
 		// the 1 number is the number of data points
 		// the 2 number is the frequency step
 		// the data then follows
 
 
+		file_str->precision(16);
 		*(file_str) << "# g''(t)===C(t) function of time\n";
 
 		for(int indd=0;indd<numt;indd++)
@@ -1489,13 +1494,13 @@ void numericalSD::printGDERIV2(string fname)
 			double time;
 			time= indd*deltat;
 
-            *(file_str)<< setprecision(9) << time*const5305;
+            *(file_str)<< time*const5305;
             *(file_str) << "\t";
 
 			val_s = accessory_a3P->Get(time);
-			*(file_str)<< setprecision(9) << val_s.real();
+			*(file_str)<< val_s.real();
 			*(file_str) << "\t";
-			*(file_str)<< setprecision(9) << val_s.imag();
+			*(file_str)<< val_s.imag();
 			*(file_str) << "\n";
 		}
                 file_str->close();
@@ -1552,7 +1557,7 @@ asymptoticLF_complexv numericalSD::GetGf()
 	if(lineshape == NULL)
 		CreateLineshape();
          //cout<<lineshape<<" test\n";
-    
+
     asymptoticLF_complexv ret = *lineshape;
     ret.UpdateAxis(0.0,lineshape->GetStep()*const5305);
 
@@ -1571,7 +1576,7 @@ asymptoticLF_complexv numericalSD::GetGfD1f()
 //			-coni*accessory_a2P->Get(0);
 
     asymptoticLF_complexv ret = (*accessory_a2P - accessory_a2P->Get(0) )*coni;
-        
+
     ret.UpdateAxis(0.0,accessory_a3P->GetStep()*const5305);
 	return ret;
 }
@@ -1596,7 +1601,7 @@ asymptoticLF_complexv numericalSD::GetCf()
 {
 	if(accessory_a1P == NULL)
 		ConstructAccessoryFunction();
-    
+
     asymptoticLF_complexv ret = *accessory_a3P;
     ret.UpdateAxis(0.0,accessory_a3P->GetStep()*const5305);
 	return ret;
@@ -1610,26 +1615,26 @@ asymptoticLF_complexv numericalSD::GetMf()
     // two times the number of points
     if(accessory_a1P == NULL)
         ConstructAccessoryFunction();
-    
-    
-    
+
+
+
     int numv = spectral_density->GetN();
     double xmax = spectral_density->GetXF(); // cm-1
     double deltav = xmax/numv; // cm-1
-    
-    
+
+
     // making the dataset
     storage<complexv> idat(1);
     idat.Allocate(2*numv);
-    
+
     // creating the dataset
     for(int iom = 0; iom<2*numv; iom ++)
     {
         double omega = -xmax +iom*deltav;
-        
+
         idat.data1D[iom] = GetMf(omega);
     }
-    
+
     //idat.data1D[0]=0.0;
     return asymptoticLF_complexv(idat,-xmax,deltav, 0.0,0.0,0.0);
 }
@@ -1645,26 +1650,26 @@ asymptoticLF_complexv numericalSD::GetMfn()
     // two times the number of points
     if(accessory_a1P == NULL)
         ConstructAccessoryFunction();
-    
 
-    
+
+
 	int numv = spectral_density->GetN();
 	double xmax = spectral_density->GetXF(); // cm-1
 	double deltav = xmax/numv; // cm-1
-    
-    
+
+
     // making the dataset
     storage<complexv> idat(1);
     idat.Allocate(2*numv);
-   
+
     // creating the dataset
     for(int iom = 0; iom<2*numv; iom ++)
     {
         double omega = -xmax +iom*deltav;
-    
+
         idat.data1D[iom] = GetMfn(omega);
     }
-    
+
     //idat.data1D[0]=0.0;
     return asymptoticLF_complexv(idat,-xmax,deltav, 0.0,0.0,0.0);
 }
@@ -1673,7 +1678,7 @@ asymptoticLF_complexv numericalSD::GetMfn()
 void numericalSD::SetT( double dtemperature)
 {
     constants cc;
-    
+
     temperature = const0_695*dtemperature;
 
 }
@@ -1687,5 +1692,3 @@ void numericalSD::UpdateFlagAcc(int iflag)
 {
 	flagaccessories = iflag;
 }
-
-

@@ -158,7 +158,7 @@ int main(int argc, const char * argv[])
             }
         }
 
-    double timestep=0.1;
+  double timestep=0.1;
 	if(tio.LookUpAndReadSquareMatrix<double>(
 			"MethodOutputTimeStep:",
 			"Reading the output timestep\n",
@@ -167,7 +167,7 @@ int main(int argc, const char * argv[])
             timestep = arr.data2D[0][0];
         }
 
-    int timepoints;
+  int timepoints=0;
 	if(tio.LookUpAndReadSquareMatrix<int>(
 			"MethodOutputTimePoints:",
 			"Reading the number of points on the output\n",
@@ -178,7 +178,7 @@ int main(int argc, const char * argv[])
 
 
 	//implementation of internaltimeS and internaltimeN
-        double internaltimestep=0;
+  double internaltimestep=0;
 	if(tio.LookUpAndReadSquareMatrix<double>(
     			"MethodInternalTimeStep:",
     			"Reading the timestep for correlation function\n",
@@ -187,7 +187,7 @@ int main(int argc, const char * argv[])
           internaltimestep = arr.data2D[0][0];
      	 }
 
-        int internaltimepoints;
+  int internaltimepoints=0;
 	if(tio.LookUpAndReadSquareMatrix<int>(
     			"MethodInternalTimePoints:",
     			"Reading the number of points of correlation function\n",
@@ -270,6 +270,7 @@ int main(int argc, const char * argv[])
     ofstream ofs(ofilename.c_str());
 
     // final output
+		ofs.precision(16);
     ofs<<"# time"<<"\t";
         for(int ia = 0; ia< numL; ia++)
         for(int ib = 0; ib< numR; ib++)

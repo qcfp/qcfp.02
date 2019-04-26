@@ -877,10 +877,10 @@ storage<complexv> calculator_redfield::GetMemoryKernel(double time, double& delt
     }
 
 
-    cout<<"numL = "<<numL;
-    cout<<"shL = "<<shL;
-    cout<<"numR = "<<numR;
-    cout<<"shR = "<<shR;
+    //cout<<"numL = "<<numL;
+    //cout<<"shL = "<<shL;
+    //cout<<"numR = "<<numR;
+    //cout<<"shR = "<<shR;
 
 
       if(!kernel.IsAlloc())
@@ -903,7 +903,12 @@ storage<complexv> calculator_redfield::GetMemoryKernel(double time, double& delt
 		{
 			double omegat = evals.data1D[ic+shL]-evals.data1D[ib1+shR];
 		        for(int io=0;io<numosc;io++)
-			R1 += exp(cnni*omegat*tau)*Mijkl.data5D[ia+shL][ic+shL][ic+shL][ia1+shL][io]*cfun.data1D[io].Get(tau);
+						{
+							R1 += exp(cnni*omegat*tau)*Mijkl.data5D[ia+shL][ic+shL][ic+shL][ia1+shL][io]*cfun.data1D[io].Get(tau);
+
+							//if(abs(Mijkl.data5D[ia+shL][ic+shL][ic+shL][ia1+shL][io])>1e-10 && it==0)
+							//	cout<<"Mijkl.data5D["<<ia+shL<<"]["<<ic+shL<<"]["<<ic+shL<<"]["<<ia1+shL<<"]["<<io<<"]= "<<Mijkl.data5D[ia+shL][ic+shL][ic+shL][ia1+shL][io]<<"\n";
+						}
 		}
 		complexv R4=0;
 		if(ia==ia1)

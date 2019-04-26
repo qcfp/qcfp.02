@@ -135,6 +135,8 @@ void propagatorMemory::Convolute(
         //int indt0=0;
         //if(indl==0)
         //    cout<<"call with timeini = "<<timeini<<"\n";
+        //if(indl==0)
+        //    cout<<"call with manifold0End = "<<manifold0End<<"\n";
 
 
         // integration by trapezoid
@@ -160,7 +162,7 @@ void propagatorMemory::Convolute(
                 {
                     double omega = omegas_memory.data1D[indr];
                     derdata1Dindl += 0.5*kernel->data3D[indt][indl][indr]
-                        *exp(coni*(omegalxtimel-omega*interval))
+                        *exp(-coni*(omegalxtimel-omega*interval))
                         *DMM->data2D[indt][indr]*timestep;
                 }
                 // the present-1 time
@@ -168,7 +170,7 @@ void propagatorMemory::Convolute(
                 {
                     double omega = omegas_memory.data1D[indr];
                     derdata1Dindl += 0.5*kernel->data3D[indt+1][indl][indr]
-                        *exp(coni*(omegalxtimel-omega*(interval+timestep)))
+                        *exp(-coni*(omegalxtimel-omega*(interval+timestep)))
                         *DMM->data2D[indt+1][indr]*timestep;
                 }
                 //indt0++;

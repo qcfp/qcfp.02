@@ -27,9 +27,9 @@ void communicator_3rd::MakeESSystem()
 
 void communicator_3rd::MakeESSystem(int flag)
 {
-    
+
     int numBosc = mfun.GetSize();
-    
+
     // going to eigensystem
     // system in eigenstate basis
     storage<double> leval1(1);
@@ -57,14 +57,14 @@ void communicator_3rd::MakeESSystem(int flag)
     if(bosonic) numlev = 3;
     constructor_f_exciton exc_system(numlev,ham,dip);
 
-    
+
     // reorganization energies
     cout<<"# Shifting electronic Hamiltonian energies up by site reorganization energies.\n";
     cout<<"# Site reorganization energies:\n";
     for(int indl=0; indl<numE; indl++)
     {
         double reorganization = 0.0;
-        
+
         // 	if(flag>0) //  shared baths approach where on the input are directly coupling constants
         // 	{
         //                 // first I calculate all site reorganization energies
@@ -77,16 +77,16 @@ void communicator_3rd::MakeESSystem(int flag)
         //                 {
         // 			std::cout<<"Error in communicator_3rd::MakeESSystem: this approach is not possible\n";
         //                 }
-        //                 
-        // 	    if((band == 2) && bosonic) 
+        //
+        // 	    if((band == 2) && bosonic)
         //     		{
         //                 	anh.data2D[indl][indl] += reorganization*2;
         //     		}
-        //                 
+        //
         //                 cout<<reorganization<<"\n";
         //             }
-        // 
-        // 
+        //
+        //
         // 	}
         // 	else
         // 	{
@@ -102,18 +102,18 @@ void communicator_3rd::MakeESSystem(int flag)
             for(int ind = 0; ind < numBosc; ind++)
                 reorganization += -coupl.data3D[ind][indl][indl]*(mfun.data1D[ind].Get(0.0)).imag();
         }
-        
-        
-        
+
+
+
         ham.data2D[indl][indl] += reorganization;
-        if((band == 2) && bosonic) 
+        if((band == 2) && bosonic)
         {
             //            anh.data2D[indl][indl] += reorganization*2;
             anh.data2D[indl][indl] += reorganization*4;
         }
         cout<<indl<<" "<<reorganization<<"\n";
     }
-    
+
     std::cout<<" Hamiltonian after reorganizations\n";
     for(int indl=0; indl<numE; indl++)
         for(int indr=0; indr<=indl; indr++)
@@ -121,10 +121,10 @@ void communicator_3rd::MakeESSystem(int flag)
             cout<<ham.data2D[indl][indr];
             if(indl==indr)cout<<"\n"; else cout<<"\t";
         }
-        
-    if(band == 2 && anh.IsAlloc()) 
+
+    if(band == 2 && anh.IsAlloc())
     std::cout<<" Anharmonicities after reorganizations\n";
-    if(band == 2 && anh.IsAlloc()) 
+    if(band == 2 && anh.IsAlloc())
     for(int indl=0; indl<numE; indl++)
     for(int indr=0; indr<=indl; indr++)
     {
@@ -133,7 +133,7 @@ void communicator_3rd::MakeESSystem(int flag)
     }
 
     if(band == 2) exc_system.AddKCouplings(anh);
-    if(band == 2 && bosonic && dip2Corrections.IsAlloc()) 
+    if(band == 2 && bosonic && dip2Corrections.IsAlloc())
         exc_system.AddADipoles(dip2Corrections);
 
 	if(pos.IsAlloc())
@@ -188,7 +188,7 @@ void communicator_3rd::MakeESSystem(int flag)
 
     // print eigenvalues 2
     if(band == 2) cout<<"# two-band level energies:\n";
-    if(band == 2) 
+    if(band == 2)
       for(int ind=0; ind<numF; ind++)
         cout<<leval2.data1D[ind]<<"\n";
 
@@ -211,7 +211,7 @@ void communicator_3rd::MakeESSystem(int flag)
     for(int inde=0; inde<numE; inde++)
     {
         double delocalization = 0;
-        
+
         for(int indl=0; indl<numE; indl++)
         {
             delocalization += (levecs.data2D[inde][indl]*levecs.data2D[inde][indl]*levecs.data2D[inde][indl]*levecs.data2D[inde][indl]);
@@ -222,7 +222,7 @@ void communicator_3rd::MakeESSystem(int flag)
 
     // print eigenvectors F
     if(band == 2) cout<<"# Evecs SSF (eigenvectors in columns):\n";
-    if(band == 2) 
+    if(band == 2)
     for(int indl=0; indl<numE; indl++)
     {
         cout<<"# ";
@@ -240,11 +240,11 @@ void communicator_3rd::MakeESSystem(int flag)
     }
 
     if(band == 2) cout<<"# Participation (delocalization) numbers for F in real space:\n";
-    if(band == 2) 
+    if(band == 2)
     for(int inde=0; inde<numF; inde++)
     {
         double delocalization = 0;
-        
+
         for(int indl=0; indl<numE; indl++)
         for(int indj=0; indj<=indl; indj++)
         {
@@ -253,7 +253,7 @@ void communicator_3rd::MakeESSystem(int flag)
         cout<<1.0/delocalization<<"\n";
     }
 
-    
+
     cout<<"# Transition dipoles:\n";
     cout<<"# number of enries:\n";
     cout<<numE+numE*numF<<"\n";
@@ -271,7 +271,7 @@ void communicator_3rd::MakeESSystem(int flag)
 
     // print eigendipoles
     if(band == 2) cout<<"# Edips E-F:\n";
-    if(band == 2) 
+    if(band == 2)
     for(int ind=0; ind<numE; ind++)
         for(int inf=0; inf<numF; inf++)
         {
@@ -346,13 +346,13 @@ void communicator_3rd::MakeESSystem(int flag)
             exc_fluct.GetGijAmplitudes11(&gamp,coupl.data2D[ind]);
         else
             exc_fluct.GetGijAmplitudesC11(gamp,coupl.data3D[ind]);
-            
+
         for(int ia=0;ia<numE;ia++)
             for(int ie=0;ie<numE;ie++)
                 gij.data3D[ia+1][ie+1][ind] += gamp.data2D[ia][ie];
         gamp.Delete();
 
-        if(band == 2) 
+        if(band == 2)
         {
         gamp.Allocate(numF,numE);
 
@@ -370,7 +370,7 @@ void communicator_3rd::MakeESSystem(int flag)
         gamp.Delete();
 
         gamp.Allocate(numF,numF);
-        
+
         if(coupl.CheckDimension()==2)
             exc_fluct.GetGijAmplitudes22(&gamp,coupl.data2D[ind]);
         else
@@ -383,7 +383,7 @@ void communicator_3rd::MakeESSystem(int flag)
         }
         // kij
         gamp.Allocate(numE,numE);
-        
+
         if(coupl.CheckDimension()==2)
             exc_fluct.GetRedAmplitudes11(&gamp,coupl.data2D[ind]);
         else
@@ -394,10 +394,10 @@ void communicator_3rd::MakeESSystem(int flag)
                 kij.data3D[ia+1][ie+1][ind] += gamp.data2D[ia][ie];
         gamp.Delete();
 
-        if(band == 2) 
+        if(band == 2)
         {
         gamp.Allocate(numF,numF);
-        
+
         if(coupl.CheckDimension()==2)
             exc_fluct.GetRedAmplitudes22(&gamp,coupl.data2D[ind]);
         else
@@ -429,7 +429,7 @@ void communicator_3rd::MakeESSystem(int flag)
                 if(ib == ia) cout<<"\n";
                 else cout<<"\t";
             }
-    
+
 
         cout<<"# diagonal  s-b coupling correlation triangular matrix\n";
         for(int ia = 0; ia<numT; ia++)
@@ -479,7 +479,7 @@ void communicator_3rd::MakeESSystem(int flag)
 	        ed_m.data2D[ia+1][0]=lemag1.data1D[ia];
 	}
     }
-    if(band == 2) 
+    if(band == 2)
     for(int ia = 0; ia<numF; ia++)
     {
         double reor = 0.0;
@@ -691,7 +691,7 @@ void communicator_3rd::SetupManifolds(int inumG, int inumE)
     numT = numG+numE+numF;
     ready = 1;
     band = 1;
-    
+
 }
 void communicator_3rd::SetupManifolds(int inumG, int inumE, int inumF)
 {
@@ -701,7 +701,7 @@ void communicator_3rd::SetupManifolds(int inumG, int inumE, int inumF)
     numT = numG+numE+numF;
     ready = 1;
     band = 1;
-    
+
 }
 
 
@@ -714,7 +714,7 @@ void communicator_3rd::Setup()
     ready = 0;
     excitonictransformed = 0;
     complexity =  "";
-    band =1; 
+    band =1;
     bath_complexity = "";
     experiment_complexity = "";
 
@@ -811,7 +811,7 @@ void communicator_3rd::Setup()
 	xsigma2=1.;
 	xsigma3=1.;
 	xsigma4=1.;
-    
+
     naturallinewidth = 0.;
 
 	ham2sorter_l.SetDimension(1);
@@ -832,7 +832,7 @@ void communicator_3rd::ReadFile(ifstream& ifs)
         ReadExperiment(ifs);
 
         ReadSpecific(ifs);
-        
+
         cout<<"all is read\n";
 
     }
@@ -883,7 +883,7 @@ void communicator_3rd::AddDephasings()
 //        reorganizations.Allocate(numt,numt);
 //        reorganizations = calcR.GetReorganizations();
 //    }
-    
+
 }
 void communicator_3rd::AddDephasingsAll()
 {
@@ -903,7 +903,7 @@ void communicator_3rd::AddDephasingsAll()
 //        reorganizations.Allocate(numt,numt);
 //        reorganizations = calcR.GetReorganizations();
 //    }
-    
+
 }
 
 void communicator_3rd::AddTransport(storage<double>& iratesG,storage<double>& iratesE,double tstep)
@@ -920,16 +920,16 @@ void communicator_3rd::AddTransport(storage<double>& iratesG,storage<double>& ir
 
 void communicator_3rd::AddTransport()
 {
-    
+
     cout<<"Error: do not call function \"communicator_3rd::AddTransport()\"!!!\n";
-    
+
     // here I create redfield rates and
     // dephasing constants from mfun
 
     transport = 1;
-    
+
     storage<asymptoticLF_complexv> g1un; // gfunctions first derivatives
-    
+
     std::size_t found;
     found = experiment_complexity.find("ModRed");
     if(found!=std::string::npos)
@@ -942,7 +942,7 @@ void communicator_3rd::AddTransport()
             numericalSD spd(tempr,spdf.data1D[ind]);
             g1un.data1D[ind] = spd.GetGfD1f();
         }
-        
+
     }
 
     // GG block
@@ -972,7 +972,7 @@ void communicator_3rd::AddTransport()
         calcR.AddFluctuations(mfun,ekij,egij);
         calcR.AddMijkl(zijkl);
 
-        
+
         found = experiment_complexity.find("ModRed");
         if(found!=std::string::npos)
         {
@@ -1008,7 +1008,7 @@ void communicator_3rd::AddTransport()
         calculator_redfield calcR(ens);
         calcR.AddFluctuations(mfun,ekij,egij);
         calcR.AddMijkl(zijkl);
-        
+
         found = experiment_complexity.find("ModRed");
         if(found!=std::string::npos)
         {
@@ -1038,7 +1038,7 @@ void communicator_3rd::ReadExperimentLin(ifstream& ifs)
     toolsIO tio;
     string str = "";
 //                 cout<<"Reading experiment parameters\n";
-   
+
     cout<<"Reading experiment setup line:\n";
     str = "";
     tio.StreamSkipTrailers(&ifs);
@@ -1055,65 +1055,65 @@ void communicator_3rd::ReadExperimentLin(ifstream& ifs)
 
 	if(tio.LookUpAndReadSquareMatrix<double>(
 		"ExperimentPolarizations:",
-		"Reading experiment laser polarizations\n", 
+		"Reading experiment laser polarizations\n",
 		2,3, arr,inputfile.str()))
 	{
         vecE1 = dvector3d(arr.data2D[0][0],arr.data2D[0][1],arr.data2D[0][2]);
         vecE2 = dvector3d(arr.data2D[1][0],arr.data2D[1][1],arr.data2D[1][2]);
 	}
-    
+
 	if(tio.LookUpAndReadSquareMatrix<double>(
 		"ExperimentWavevectors:",
-		"Reading experiment laser propagation directions\n", 
+		"Reading experiment laser propagation directions\n",
 		2,3, arr,inputfile.str()))
 	{
         veck1 = dvector3d(arr.data2D[0][0],arr.data2D[0][1],arr.data2D[0][2]);
         veck2 = dvector3d(arr.data2D[1][0],arr.data2D[1][1],arr.data2D[1][2]);
 	}
-    
+
 	if(tio.LookUpAndReadSquareMatrix<double>(
 		"ExperimentInteractionFrequencies:",
-		"Reading experiment laser interaction frequencies\n", 
+		"Reading experiment laser interaction frequencies\n",
 		2,1, arr,inputfile.str()))
 	{
         xomega1 = arr.data2D[0][0];
         xomega2 = arr.data2D[1][0];
 	}
     //cout<<"reading experiment parameters\n";
-    
+
 	if(tio.LookUpAndReadSquareMatrix<double>(
 		"ExperimentInitialFrequency:",
-		"Reading initial FFT frequency\n", 
+		"Reading initial FFT frequency\n",
 		1,1, arr,inputfile.str()))
 	{
         ifre1 = arr.data2D[0][0];
 	}
 	if(tio.LookUpAndReadSquareMatrix<double>(
 		"ExperimentFinalFrequency:",
-		"Reading final FFT frequency\n", 
+		"Reading final FFT frequency\n",
 		1,1, arr,inputfile.str()))
 	{
         ffre1 = arr.data2D[0][0];
 	}
 	if(tio.LookUpAndReadSquareMatrix<int>(
 		"ExperimentNumberOfPoints:",
-		"Reading the number of points in the interval\n", 
+		"Reading the number of points in the interval\n",
 		1,1, iri,inputfile.str()))
 	{
         nump = iri.data2D[0][0];
 	}
 
-        
-        
+
+
 	if(tio.LookUpAndReadSquareMatrix<double>(
 		"ExperimentNaturalLinewidth:",
-		"Reading the natural linewidth parameter\n", 
+		"Reading the natural linewidth parameter\n",
 		1,1, arr,inputfile.str()))
 	{
         naturallinewidth = arr.data2D[0][0];
 	}
 
-        
+
 }
 
 
@@ -1139,10 +1139,10 @@ void communicator_3rd::ReadExperiment3rd(ifstream& ifs)
         found = experiment_complexity.find("2DES");
         if(found!=std::string::npos)
 	{
-		// very nice; correct 
+		// very nice; correct
 		;
         }
-	else 
+	else
 	{
 		cout<<"Error: wrong experiment - 2DES?\n";
 	}
@@ -1179,7 +1179,7 @@ void communicator_3rd::ReadExperiment3rd(ifstream& ifs)
     // CGSBK1 TGSBK1 CESEK1 TESEK1 CESAK1 TESAK1 CGSBK2 TGSBK2 CESEK2 TESEK2 CESAK2 TESAK2 CES1K3 CES2K3
 	if(tio.LookUpAndReadSquareMatrix<int>(
 		"ExperimentDiagramTypes:",
-		"Reading experiment diagram patterm\n", 
+		"Reading experiment diagram patterm\n",
 		1,14, iri,inputfile.str()))
 	{
 		SwitchConfigurations(iri.data2D[0][0],iri.data2D[0][1],
@@ -1199,7 +1199,7 @@ void communicator_3rd::ReadExperiment3rd(ifstream& ifs)
 
 	if(tio.LookUpAndReadSquareMatrix<double>(
 		"ExperimentPolarizations:",
-		"Reading experiment laser polarizations\n", 
+		"Reading experiment laser polarizations\n",
 		4,3, arr,inputfile.str()))
 	{
         vecE1 = dvector3d(arr.data2D[0][0],arr.data2D[0][1],arr.data2D[0][2]);
@@ -1207,10 +1207,10 @@ void communicator_3rd::ReadExperiment3rd(ifstream& ifs)
         vecE3 = dvector3d(arr.data2D[2][0],arr.data2D[2][1],arr.data2D[2][2]);
         vecE4 = dvector3d(arr.data2D[3][0],arr.data2D[3][1],arr.data2D[3][2]);
 	}
-    
+
 	if(tio.LookUpAndReadSquareMatrix<double>(
 		"ExperimentWavevectors:",
-		"Reading experiment laser propagation directions\n", 
+		"Reading experiment laser propagation directions\n",
 		4,3, arr,inputfile.str()))
 	{
         veck1 = dvector3d(arr.data2D[0][0],arr.data2D[0][1],arr.data2D[0][2]);
@@ -1218,10 +1218,10 @@ void communicator_3rd::ReadExperiment3rd(ifstream& ifs)
         veck3 = dvector3d(arr.data2D[2][0],arr.data2D[2][1],arr.data2D[2][2]);
         veck4 = dvector3d(arr.data2D[3][0],arr.data2D[3][1],arr.data2D[3][2]);
 	}
-    
+
 	if(tio.LookUpAndReadSquareMatrix<double>(
 		"ExperimentInteractionFrequencies:",
-		"Reading experiment laser interaction frequencies\n", 
+		"Reading experiment laser interaction frequencies\n",
 		4,1, arr,inputfile.str()))
 	{
         xomega1 = arr.data2D[0][0];
@@ -1233,7 +1233,7 @@ void communicator_3rd::ReadExperiment3rd(ifstream& ifs)
 
 	if(tio.LookUpAndReadSquareMatrix<double>(
 		"ExperimentInitialFrequency1:",
-		"Reading initial FFT frequency 1\n", 
+		"Reading initial FFT frequency 1\n",
 		1,1, arr,inputfile.str()))
 	{
         ifre1 = arr.data2D[0][0];
@@ -1241,7 +1241,7 @@ void communicator_3rd::ReadExperiment3rd(ifstream& ifs)
 
 	if(tio.LookUpAndReadSquareMatrix<double>(
 		"ExperimentFinalFrequency1:",
-		"Reading final FFT frequency 1\n", 
+		"Reading final FFT frequency 1\n",
 		1,1, arr,inputfile.str()))
 	{
         ffre1 = arr.data2D[0][0];
@@ -1249,7 +1249,7 @@ void communicator_3rd::ReadExperiment3rd(ifstream& ifs)
 
 	if(tio.LookUpAndReadSquareMatrix<double>(
 		"ExperimentInitialFrequency2:",
-		"Reading initial FFT frequency 2\n", 
+		"Reading initial FFT frequency 2\n",
 		1,1, arr,inputfile.str()))
 	{
         ifre2 = arr.data2D[0][0];
@@ -1257,7 +1257,7 @@ void communicator_3rd::ReadExperiment3rd(ifstream& ifs)
 
 	if(tio.LookUpAndReadSquareMatrix<double>(
 		"ExperimentFinalFrequency2:",
-		"Reading final FFT frequency 2\n", 
+		"Reading final FFT frequency 2\n",
 		1,1, arr,inputfile.str()))
 	{
         ffre2 = arr.data2D[0][0];
@@ -1265,7 +1265,7 @@ void communicator_3rd::ReadExperiment3rd(ifstream& ifs)
 
 	if(tio.LookUpAndReadSquareMatrix<double>(
 		"ExperimentInitialFrequency3:",
-		"Reading initial FFT frequency 3\n", 
+		"Reading initial FFT frequency 3\n",
 		1,1, arr,inputfile.str()))
 	{
         ifre3 = arr.data2D[0][0];
@@ -1273,7 +1273,7 @@ void communicator_3rd::ReadExperiment3rd(ifstream& ifs)
 
 	if(tio.LookUpAndReadSquareMatrix<double>(
 		"ExperimentFinalFrequency3:",
-		"Reading final FFT frequency 3\n", 
+		"Reading final FFT frequency 3\n",
 		1,1, arr,inputfile.str()))
 	{
         ffre3 = arr.data2D[0][0];
@@ -1282,21 +1282,21 @@ void communicator_3rd::ReadExperiment3rd(ifstream& ifs)
 	/////////////////////////
 	if(tio.LookUpAndReadSquareMatrix<double>(
 		"ExperimentDelay3:",
-		"Reading time delay 3\n", 
+		"Reading time delay 3\n",
 		1,1, arr,inputfile.str()))
 	{
         tf3 = arr.data2D[0][0];
 	}
 	if(tio.LookUpAndReadSquareMatrix<double>(
 		"ExperimentFinalDelay3:",
-		"Reading final time delay 3\n", 
+		"Reading final time delay 3\n",
 		1,1, arr,inputfile.str()))
 	{
         tf3 = arr.data2D[0][0];
 	}
 	if(tio.LookUpAndReadSquareMatrix<double>(
 		"ExperimentInitialDelay3:",
-		"Reading initial time delay 3\n", 
+		"Reading initial time delay 3\n",
 		1,1, arr,inputfile.str()))
 	{
         ti3 = arr.data2D[0][0];
@@ -1304,21 +1304,21 @@ void communicator_3rd::ReadExperiment3rd(ifstream& ifs)
 
 	if(tio.LookUpAndReadSquareMatrix<double>(
 		"ExperimentDelay2:",
-		"Reading time delay 2\n", 
+		"Reading time delay 2\n",
 		1,1, arr,inputfile.str()))
 	{
         tf2 = arr.data2D[0][0];
 	}
 	if(tio.LookUpAndReadSquareMatrix<double>(
 		"ExperimentFinalDelay2:",
-		"Reading final time delay 2\n", 
+		"Reading final time delay 2\n",
 		1,1, arr,inputfile.str()))
 	{
         tf2 = arr.data2D[0][0];
 	}
 	if(tio.LookUpAndReadSquareMatrix<double>(
 		"ExperimentInitialDelay2:",
-		"Reading initial time delay 2\n", 
+		"Reading initial time delay 2\n",
 		1,1, arr,inputfile.str()))
 	{
         ti2 = arr.data2D[0][0];
@@ -1326,21 +1326,21 @@ void communicator_3rd::ReadExperiment3rd(ifstream& ifs)
 
 	if(tio.LookUpAndReadSquareMatrix<double>(
 		"ExperimentDelay1:",
-		"Reading time delay 1\n", 
+		"Reading time delay 1\n",
 		1,1, arr,inputfile.str()))
 	{
         tf1 = arr.data2D[0][0];
 	}
 	if(tio.LookUpAndReadSquareMatrix<double>(
 		"ExperimentFinalDelay1:",
-		"Reading final time delay 1\n", 
+		"Reading final time delay 1\n",
 		1,1, arr,inputfile.str()))
 	{
         tf1 = arr.data2D[0][0];
 	}
 	if(tio.LookUpAndReadSquareMatrix<double>(
 		"ExperimentInitialDelay1:",
-		"Reading initial time delay 1\n", 
+		"Reading initial time delay 1\n",
 		1,1, arr,inputfile.str()))
 	{
         ti1 = arr.data2D[0][0];
@@ -1349,7 +1349,7 @@ void communicator_3rd::ReadExperiment3rd(ifstream& ifs)
 	////////////////////////////
 	if(tio.LookUpAndReadSquareMatrix<int>(
 		"ExperimentNumberOfPoints:",
-		"Reading the number of points in the interval\n", 
+		"Reading the number of points in the interval\n",
 		1,1, iri,inputfile.str()))
 	{
         nump = iri.data2D[0][0];
@@ -1360,34 +1360,34 @@ void communicator_3rd::ReadExperiment3rd(ifstream& ifs)
 
 	if(tio.LookUpAndReadSquareMatrix<double>(
 		"ExperimentResonantFrequency1:",
-		"Reading experiment resonant frequency 1\n", 
+		"Reading experiment resonant frequency 1\n",
 		1,1, arr,inputfile.str()))
 	{
         ifre1 = arr.data2D[0][0];
 	}
 	if(tio.LookUpAndReadSquareMatrix<double>(
 		"ExperimentResonantFrequency2:",
-		"Reading experiment resonant frequency 2\n", 
+		"Reading experiment resonant frequency 2\n",
 		1,1, arr,inputfile.str()))
 	{
         ifre2 = arr.data2D[0][0];
 	}
 	if(tio.LookUpAndReadSquareMatrix<double>(
 		"ExperimentResonantFrequency3:",
-		"Reading experiment resonant frequency 3\n", 
+		"Reading experiment resonant frequency 3\n",
 		1,1, arr,inputfile.str()))
 	{
         ifre3 = arr.data2D[0][0];
 	}
 	}
-	
-	
-	
-	
-	
+
+
+
+
+
 	if(tio.LookUpAndReadSquareMatrix<double>(
 		"ExperimentNaturalLinewidth:",
-		"Reading the natural linewidth parameter\n", 
+		"Reading the natural linewidth parameter\n",
 		1,1, arr,inputfile.str()))
 	{
         naturallinewidth = arr.data2D[0][0];
@@ -1447,7 +1447,7 @@ void communicator_3rd::ReadSystem(ifstream& ifs)
 	if(band == 2)
 	if(tio.LookUpAndReadSquareMatrix<int>(
 		"EigensysNumberOf012Levels:",
-		"Reading the number of zero, 1 and 2-band levels\n", 
+		"Reading the number of zero, 1 and 2-band levels\n",
 		3,1, iri,inputfile.str()))
 	{
                 numG = iri.data2D[0][0];
@@ -1459,7 +1459,7 @@ void communicator_3rd::ReadSystem(ifstream& ifs)
 	if(band == 1)
 	if(tio.LookUpAndReadSquareMatrix<int>(
 		"EigensysNumberOf01Levels:",
-		"Reading the number of zero and 1-band levels\n", 
+		"Reading the number of zero and 1-band levels\n",
 		2,1, iri,inputfile.str()))
 	{
                 numG = iri.data2D[0][0];
@@ -1471,7 +1471,7 @@ void communicator_3rd::ReadSystem(ifstream& ifs)
 
 	if(tio.LookUpAndReadSquareMatrix<double>(
 		"EigensysLevelEnergies:",
-		"Reading the energies of all energy levels\n", 
+		"Reading the energies of all energy levels\n",
 		numT,1, arr,inputfile.str()))
 	{
         	evals.Allocate(numT);
@@ -1482,7 +1482,7 @@ void communicator_3rd::ReadSystem(ifstream& ifs)
 
 	if(tio.LookUpAndReadSquareMatrix<int>(
 		"EigensysTransitionDipoles:",
-		"Reading the transition dipoles between all energy levels\n", 
+		"Reading the transition dipoles between all energy levels\n",
 		1,1, iri,inputfile.str()))
 	{	// this one is for the number of entries
 		int numX = iri.data2D[0][0];
@@ -1515,7 +1515,7 @@ void communicator_3rd::ReadSystem(ifstream& ifs)
 
 	if(tio.LookUpAndReadSquareMatrix<int>(
 		"EigensysMagneticDipoles:",
-		"Reading the magnetic transition dipoles between all energy levels\n", 
+		"Reading the magnetic transition dipoles between all energy levels\n",
 		1,1, iri,inputfile.str()))
 	{	// this one is for the number of entries
 		int numX = iri.data2D[0][0];
@@ -1549,7 +1549,7 @@ void communicator_3rd::ReadSystem(ifstream& ifs)
 
 	if(tio.LookUpAndReadSquareMatrix<int>(
 		"EigensysQuadrupoles:",
-		"Reading the magnetic transition dipoles between all energy levels\n", 
+		"Reading the magnetic transition dipoles between all energy levels\n",
 		1,1, iri,inputfile.str()))
 	{	// this one is for the number of entries
 		int numX = iri.data2D[0][0];
@@ -1584,7 +1584,7 @@ void communicator_3rd::ReadSystem(ifstream& ifs)
                 arr.data2D[ind][6],//yz
                 arr.data2D[ind][4],//zx
                 arr.data2D[ind][6],//zy
-                arr.data2D[ind][7] //zz                
+                arr.data2D[ind][7] //zz
                                           );
 			eten.data2D[i2][i1]=eten.data2D[i1][i2];
 		}
@@ -1594,10 +1594,10 @@ void communicator_3rd::ReadSystem(ifstream& ifs)
 
 	// excitonic part
 
-	// excitonic number of sites 
+	// excitonic number of sites
 	if(tio.LookUpAndReadSquareMatrix<int>(
 		"ExcNumberOfSites:",
-		"Reading excitonic number of sites\n", 
+		"Reading excitonic number of sites\n",
 		1, 1, iri,inputfile.str()))
 	{
 		numE = iri.data2D[0][0];
@@ -1607,7 +1607,7 @@ void communicator_3rd::ReadSystem(ifstream& ifs)
 	// excitonic main hamiltonian
 	if(tio.LookUpAndReadTriangularMatrix<double>(
 		"ExcMainHamiltonian:",
-		"Reading main excitonic hamiltonian\n", 
+		"Reading main excitonic hamiltonian\n",
 		numE, arr,inputfile.str()))
 	{
 		ham.Allocate(numE,numE);
@@ -1623,7 +1623,7 @@ void communicator_3rd::ReadSystem(ifstream& ifs)
     if(band == 2)
 	if(tio.LookUpAndReadTriangularMatrix<double>(
 		"ExcBiparticleAnharmonicites:",
-		"Reading excitonic anharmonicities\n", 
+		"Reading excitonic anharmonicities\n",
 		numE, arr,inputfile.str()))
 	{
 		anh.Allocate(numE,numE);
@@ -1638,7 +1638,7 @@ void communicator_3rd::ReadSystem(ifstream& ifs)
 	// excitonic electric vectors
 	if(tio.LookUpAndReadSquareMatrix<double>(
 		"ExcElectricDipoles:",
-		"Reading excitonic electric dipoles\n", 
+		"Reading excitonic electric dipoles\n",
 		numE, 3, arr,inputfile.str()))
 	{
 		dip.Allocate(numE);
@@ -1650,7 +1650,7 @@ void communicator_3rd::ReadSystem(ifstream& ifs)
 	// excitonic position vectors
 	if(tio.LookUpAndReadSquareMatrix<double>(
 		"ExcPositionVectors:",
-		"Reading excitonic position vectors\n", 
+		"Reading excitonic position vectors\n",
 		numE, 3, arr,inputfile.str()))
 	{
 		pos.Allocate(numE);
@@ -1662,7 +1662,7 @@ void communicator_3rd::ReadSystem(ifstream& ifs)
 	// reading excitonic magnetic dipoles
 	if(tio.LookUpAndReadSquareMatrix<double>(
 		"ExcMagneticDipoles:",
-		"Reading excitonic magnetic dipoles\n", 
+		"Reading excitonic magnetic dipoles\n",
 		numE, 3, arr,inputfile.str()))
 	{
 		d_m.Allocate(numE);
@@ -1676,7 +1676,7 @@ void communicator_3rd::ReadSystem(ifstream& ifs)
     if(band == 2)
 	if(tio.LookUpAndReadSquareMatrix<double>(
 		"ExcElectricDipoleAnharmonicities:",
-		"Reading excitonic electric dipole anharmonicities\n", 
+		"Reading excitonic electric dipole anharmonicities\n",
 		numE, 3, arr,inputfile.str()))
 	{
 		dip2Corrections.Allocate(numE);
@@ -1690,7 +1690,7 @@ void communicator_3rd::ReadSystem(ifstream& ifs)
 	// finalizing setup
 	if(!eigensys){
 		numG = 1;
-		numF = 0; 
+		numF = 0;
 		if(band == 2){
 			if(bosonic)
 				numF = numE*(numE+1)/2;
@@ -1729,7 +1729,7 @@ void communicator_3rd::ReadBath(ifstream& ifs)
 	// bath temperature
 	if(tio.LookUpAndReadSquareMatrix<double>(
 		"BathTemperature:",
-		"Reading bath temperature\n", 
+		"Reading bath temperature\n",
 		1, 1, arr,inputfile.str()))
 	{
 		tempr = arr.data2D[0][0];
@@ -1738,7 +1738,7 @@ void communicator_3rd::ReadBath(ifstream& ifs)
 	// bath oscillator number
 	if(tio.LookUpAndReadSquareMatrix<int>(
 		"BathNumberOfOscillators:",
-		"Reading number of bath oscillators\n", 
+		"Reading number of bath oscillators\n",
 		1, 1, iri,inputfile.str()))
 	{
 		numBosc = iri.data2D[0][0];
@@ -1803,9 +1803,9 @@ void communicator_3rd::ReadBath(ifstream& ifs)
     }
     else
     {
-	// these are purely excitonic properties        
+	// these are purely excitonic properties
         //cout<<"reading couplings to the bath\n";
-        
+
         int ctype=0;
         // reading the flag if fluctuations are correlated or not
         //if(complexity.compare("key-setup-complete")==0)
@@ -1820,13 +1820,13 @@ void communicator_3rd::ReadBath(ifstream& ifs)
                 ctype = 0;
 
         }
-        
-        
+
+
 
 /*
 	if(tio.LookUpAndReadSquareMatrix<double>(
 		"ExcBathSystemCorrelatedCouplingConstants:",
-		"Reading bath-system coupling constants. Coupling term is |n><n|*w*c*q. The reorganization energy of that mode is (wc^2)/2. Now the spectral density file contains these c numbers. The whole \"spectral density\" is scaled by this coupling parameter.\n", 
+		"Reading bath-system coupling constants. Coupling term is |n><n|*w*c*q. The reorganization energy of that mode is (wc^2)/2. Now the spectral density file contains these c numbers. The whole \"spectral density\" is scaled by this coupling parameter.\n",
 		numBosc,numE, arr,inputfile.str()))
 	{
 		coupl.Allocate(numBosc,numE);
@@ -1836,16 +1836,16 @@ void communicator_3rd::ReadBath(ifstream& ifs)
 	}
 */
 
-        
+
         if(ctype == 0)
         {
-           // uncorrelated 
+           // uncorrelated
 		numl=numBosc;
 		numr=numE;
 
 	if(tio.LookUpAndReadSquareMatrix<double>(
 		"ExcBathSystemCouplingMagnitudes:",
-		"Reading bath-system coupling amplitudes\n", 
+		"Reading bath-system coupling amplitudes\n",
 		numl,numr, arr,inputfile.str()))
 	{
 		coupl.Allocate(numl,numr);
@@ -1868,11 +1868,11 @@ void communicator_3rd::ReadBath(ifstream& ifs)
 
 			stringstream ss;
 			ss<<inb;
-        
+
 //            str = "";
 	if(tio.LookUpAndReadTriangularMatrix<double>(
 		"ExcBathSystemCorrelatedCouplingMagnitudes_"+ss.str()+":",
-		"Reading bath-system coupling amplitudes "+ss.str()+"\n", 
+		"Reading bath-system coupling amplitudes "+ss.str()+"\n",
 		numl, arr,inputfile.str()))
 	{
 		for(int inl=0; inl<numl; inl ++)
@@ -1885,16 +1885,16 @@ void communicator_3rd::ReadBath(ifstream& ifs)
 		}
             coupl = cmatrix;
             // deallocation is automatic
-           
+
         }
-       
+
     }
 
 
 
 	if(tio.LookUpAndReadSquareMatrix<double>(
 		"InternalPropagationTimeStep:",
-		"Reading the internal propagation timestep\n", 
+		"Reading the internal propagation timestep\n",
 		1,1, arr,inputfile.str()))
 	{
         propagationparameterStep = arr.data2D[0][0];
@@ -1903,12 +1903,12 @@ void communicator_3rd::ReadBath(ifstream& ifs)
 
 	if(tio.LookUpAndReadSquareMatrix<int>(
 		"InternalPropagationTimeNump:",
-		"Reading the internal propagation time points number\n", 
+		"Reading the internal propagation time points number\n",
 		1,1, iri,inputfile.str()))
 	{
         propagationparameterNump = iri.data2D[0][0];
 	}
-    
+
 }
 
 
@@ -1929,32 +1929,32 @@ int communicator_3rd::LookUpAndReadBathSpectraldensities(string keyword,string l
 
 
 
-    
-    
+
+
     spdf.Allocate(numBosc);
-    
+
     mfun.Allocate(numBosc);
-    
+
     gfun.Allocate(numBosc);
 
     cfun.Allocate(numBosc);
-    
-    
+
+
     for(int ind = 0; ind<numBosc; ind++)
     {
         int reading = 1;
-        
+
         // taking filenames from the ifile
         str = "";
         tio.StreamSkipTrailers(ifs);
         getline(ifs,str);
         tio.StreamSkipTrailers(str);
         cout<<"Reading and transforming file: "<<str<<"\n";
-        
+
         numericalSD spd(tempr);
 //        spd.SetZPLGamma(gammaZPL);
-        
-        
+
+
         if(true)
         {
             // checking the wrk files
@@ -2041,9 +2041,9 @@ int communicator_3rd::LookUpAndReadBathSpectraldensities(string keyword,string l
         }
         cout<<"Done processing file: "<<str<<"\n";
   }
-        
-        
-    
+
+
+
 	return 1;
 	}
 	return 0;
@@ -2064,12 +2064,12 @@ void communicator_3rd::Publish(string& ife)
 
 void communicator_3rd::Publish(ofstream& ofs)
 {
-    
+	ofs.precision(16);
+
      cout<<"Publishing result\n";
     if(simType == 0) // for linear spectra
     {
         ofs<<outputstring;
-        ofs.precision(12);
         double fre;
         double dfre = (ffre1-ifre1)/nump;
         for(int ind = 0; ind<nump; ind++)
@@ -2082,13 +2082,12 @@ void communicator_3rd::Publish(ofstream& ofs)
             //    cout<<fre<<" "<<signal.Get(fre)<<"\n";
             //}
         }
-    }   
+    }
 
     if(simType == 1)
     {
         // this is only for 2Q2D
         ofs<<outputstring;
-        ofs.precision(12);
 
         double fre2;
         double dfre2 = (ffre2-ifre2)/nump;
@@ -2108,7 +2107,6 @@ void communicator_3rd::Publish(ofstream& ofs)
     {
         // this is only for rephasing and non-rephasing 2D
         ofs<<outputstring;
-        ofs.precision(12);
 
         double fre1;
         double dfre1 = (ffre1-ifre1)/nump;
@@ -2128,7 +2126,6 @@ void communicator_3rd::Publish(ofstream& ofs)
     {
         // this is only for 2Q2D
         ofs<<outputstring;
-        ofs.precision(12);
 
         double fre1;
         double dfre1 = (ffre1-ifre1)/nump;
@@ -2154,7 +2151,7 @@ void communicator_3rd::Publish2DRe(ofstream& ofs)
 {
 
     //ofs<<"# QCFP communicator_3rd_excitons class signal Re\n";
-    ofs.precision(12);
+    ofs.precision(16);
 
 
     storage<double> tstr(2);
@@ -2181,7 +2178,7 @@ void communicator_3rd::Publish2DIm(ofstream& ofs)
 {
 
     //ofs<<"# QCFP communicator_3rd_excitons class signal Im\n";
-    ofs.precision(12);
+    ofs.precision(16);
 
 
     storage<double> tstr(2);
@@ -2208,25 +2205,25 @@ void communicator_3rd::Publish2DIm(ofstream& ofs)
 void communicator_3rd::FinalizeESSystem(int nonmarkovian)
 {
     int numBosc = mfun.GetSize();
-    
+
         // shift all energies because of the coupling to the bath
         for(int ind=0;ind<numT;ind++){
 
             double reor = 0.0;
             for(int ib=0;ib<numBosc;ib++)
                 reor += -(gij.data3D[ind][ind][ib]*mfun.data1D[ib].Get(0.0)).imag();
-                
+
             evals.data1D[ind] += reor;
-        }    
-    
+        }
+
         calculator_redfield calcR(evals);
-        
-        
+
+
     // setting up all transport rates and dephasings
     transport = 1;
-    
+
     storage<asymptoticLF_complexv> g1un(1); // gfunctions first derivatives
-    
+
     std::size_t found;
     found = experiment_complexity.find("ModRed");
     if(found!=std::string::npos)
@@ -2238,14 +2235,14 @@ void communicator_3rd::FinalizeESSystem(int nonmarkovian)
             numericalSD spd(tempr,spdf.data1D[ind]);
             g1un.data1D[ind] = spd.GetGfD1f();
         }
-        
+
         calcR.AddFluctuations(mfun,cfun,gfun,g1un,kij,gij,zijkl);
     }
     else
         calcR.AddFluctuations(mfun,kij,gij);
-    
 
-    
+
+
         // getting all reorganization energy matrix
         if(!reorganizations.IsAlloc())
         {
@@ -2254,7 +2251,7 @@ void communicator_3rd::FinalizeESSystem(int nonmarkovian)
         }
 
 
-        
+
     storage<double> trates(2);
     if(found!=std::string::npos)
         trates = calcR.GetTransportRatesModRed();
@@ -2271,8 +2268,8 @@ void communicator_3rd::FinalizeESSystem(int nonmarkovian)
         for(int ib=0; ib<numG; ib++)
             ratesg.data2D[ia][ib]=trates.data2D[ia][ib];
     }
-            
-    
+
+
     // EE block
     if(!ratese.IsAlloc())
     {
@@ -2281,10 +2278,10 @@ void communicator_3rd::FinalizeESSystem(int nonmarkovian)
         for(int ia=0; ia<numE; ia++)
         for(int ib=0; ib<numE; ib++)
             ratese.data2D[ia][ib]=trates.data2D[ia+numG][ib+numG];
-    }    
-    
-    
-        
+    }
+
+
+
         // compute dephasings
 	if(!dephasings.IsAlloc())
 	{
@@ -2298,7 +2295,7 @@ void communicator_3rd::FinalizeESSystem(int nonmarkovian)
     }
 
 
-	
+
 	// set up the populations of the ground state
 	if(!grPops.IsAlloc())
     {
@@ -2324,7 +2321,3 @@ void communicator_3rd::FinalizeESSystem(int nonmarkovian)
         }
     }
 }
-
-
-
-
