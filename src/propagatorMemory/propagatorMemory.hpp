@@ -45,12 +45,13 @@ public:
 
 
     // this function initializes the algorithm
-    void Initialize(storage<complexv>& kernel,
-                    storage<double>& omegas_memory,
-                    storage<complexv>& DMM,
-                    storage<double>& timesinternal);
-    void Initialize(propagatorMemory& prop);
-    void InitializeHistory(propagatorMemory& prop);
+    void Initialize(storage<complexv>& ikernel,
+                    storage<double>& iomegas_memory,
+										storage<double>& iomegas_reorganizations_memory,
+                    storage<complexv>& iDMM,
+                    storage<double>& itimesinternal);
+    void Initialize(propagatorMemory& iprop);
+    void InitializeHistory(propagatorMemory& iprop);
 
     // this function calculates current variables when derivs is given
     void Update( storage<complexv>& der, double timestep);
@@ -83,6 +84,7 @@ public:
 
     // additional history tuner when not time translationary
     storage<double> omegas_memory;
+		storage<double> omegas_reorganizations_memory;
 
     //history matrix 1
     storage<complexv>* DMM;

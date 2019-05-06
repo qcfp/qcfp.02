@@ -360,10 +360,12 @@ storage<complexv> propagatorExciton::PropagateDM(storage<double>& times)
 
 					// setting up omegas:
 					omegas_memory.Allocate(numL*numR);
+					omegas_reorganizations_memory.Allocate(numL*numR);
 					for(int id2=0;id2<numL;id2++)
 					for(int id1=0;id1<numR;id1++)
 					{
 						omegas_memory.data1D[id2*numR+id1]=energies.data1D[id2+shL]-energies.data1D[id1+shR];
+						omegas_reorganizations_memory.data1D[id2*numR+id1]=energies.data1D[id2+shL]-energies.data1D[id1+shR];
 					}
 					// also setting the history of density matrix into 1D form:
 					//double DMMcontinousInternalTimeStep;
@@ -409,10 +411,12 @@ storage<complexv> propagatorExciton::PropagateDM(storage<double>& times)
 
 					// setting up omegas:
 					omegas_memory.Allocate(numL*numR);
+					omegas_reorganizations_memory.Allocate(numL*numR);
 					for(int id2=0;id2<numL;id2++)
 					for(int id1=0;id1<numR;id1++)
 					{
 						omegas_memory.data1D[id2*numR+id1]=energies.data1D[id2+shL]-energies.data1D[id1+shR];
+						omegas_reorganizations_memory.data1D[id2*numR+id1]=energies.data1D[id2+shL]-energies.data1D[id1+shR];
 					}
 
 					// also setting the history of density matrix into 1D form:
@@ -483,8 +487,10 @@ storage<complexv> propagatorExciton::PropagateDM(storage<double>& times)
 
 	                matrix.data2D[il][ir] = 0.0;
 	                if(il2 == ir2 && il1 == ir1){
-	                    matrix.data2D[il][ir] +=  cnni*(energies.data1D[il2+shL]-energiesReorg.data2D[il2+shL][il2+shL]);
-	                    matrix.data2D[il][ir] +=  coni*(energies.data1D[il1+shR]-energiesReorg.data2D[il1+shR][il1+shR]);
+	                    //matrix.data2D[il][ir] +=  cnni*(energies.data1D[il2+shL]-energiesReorg.data2D[il2+shL][il2+shL]);
+	                    //matrix.data2D[il][ir] +=  coni*(energies.data1D[il1+shR]-energiesReorg.data2D[il1+shR][il1+shR]);
+											matrix.data2D[il][ir] +=  cnni*energies.data1D[il2+shL];
+	                    matrix.data2D[il][ir] +=  coni*energies.data1D[il1+shR];
 	                }
 	                matrix.data2D[il][ir] += superoperatorM.data4D[il2][il1][ir2][ir1];
 	            }
@@ -526,8 +532,10 @@ storage<complexv> propagatorExciton::PropagateDM(storage<double>& times)
 			if((il2+shL)!=(il1+shR))
             		{
                           complexv argument = 0;
-                          argument += cnni*(energies.data1D[il2+shL]-energiesReorg.data2D[il2+shL][il2+shL]);
-                          argument += coni*(energies.data1D[il1+shR]-energiesReorg.data2D[il1+shR][il1+shR]);
+                          //argument += cnni*(energies.data1D[il2+shL]-energiesReorg.data2D[il2+shL][il2+shL]);
+                          //argument += coni*(energies.data1D[il1+shR]-energiesReorg.data2D[il1+shR][il1+shR]);
+													argument += cnni*energies.data1D[il2+shL];
+                          argument += coni*energies.data1D[il1+shR];
                           argument -= superoperatorSG.data2D[il2+shL][il1+shR];
 	                  result.data3D[numt][il2][il1] = exp(argument*times.data1D[numt])*dmatrix0.data2D[il2][il1];
 
@@ -714,6 +722,7 @@ void propagatorExciton::ConvoluteCfun(
 							if(ib==ib1)
 	    				for(int ic=0;ic<numL;ic++)
 							{
+								// here reorganization energies are missing
 								double omegat = energies.data1D[ic+shL]-energies.data1D[ib1+shR];
 								R1 += exp(cnni*omegat*tau)*kernel->data3D[io][(ia+shL)*numL+(ic+shL)][(ic+shL)*numL+(ia1+shL)]
                     *cfun_requested;

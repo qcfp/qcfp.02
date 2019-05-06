@@ -55,8 +55,6 @@ void communicator_3rd::MakeESSystem(int flag)
     // now making the two-level systems
     int numlev = 2;
     if(bosonic) numlev = 3;
-    constructor_f_exciton exc_system(numlev,ham,dip);
-
 
     // reorganization energies
     cout<<"# Shifting electronic Hamiltonian energies up by site reorganization energies.\n";
@@ -131,6 +129,13 @@ void communicator_3rd::MakeESSystem(int flag)
         cout<<anh.data2D[indl][indr];
         if(indl==indr)cout<<"\n"; else cout<<"\t";
     }
+
+
+
+		// starting eigenstate descriptions
+		constructor_f_exciton exc_system(numlev,ham,dip);
+
+
 
     if(band == 2) exc_system.AddKCouplings(anh);
     if(band == 2 && bosonic && dip2Corrections.IsAlloc())

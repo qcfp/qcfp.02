@@ -280,6 +280,8 @@ void calculator_abs_reduced<Type>::Launch()
         for(int ig1 = 0; ig1< numg; ig1++)
         for(int ie1 = 0; ie1< nume; ie1++)
         {
+					//int ie1 = 0;
+
 	    			transition.AssignLevels(0,ig1,ie1+numg);
             prop10->SetDeltaDM(ie1,ig1);
             dm1t10=prop10->PropagateDM(times1);
@@ -295,7 +297,8 @@ void calculator_abs_reduced<Type>::Launch()
             {
             dat3d.data1D[it1] += coni*damplitude
                     *grPops.data1D[ig1]
-                    *dm1t10.data3D[it1][ie4][ig2]*exp(-naturallinewidth*times1.data1D[it1]);
+//                    *exp( (coni*(cfre-12000.0)-20.0)*times1.data1D[it1]);
+										*dm1t10.data3D[it1][ie4][ig2]*exp( (coni*cfre-naturallinewidth)*times1.data1D[it1]);
             }
         }}}
 

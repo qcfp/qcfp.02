@@ -22,12 +22,55 @@ toolsFFT::~toolsFFT()
 	cleanFFTSpace();
 }
 
+interpolationF<complexv>  toolsFFT::inverseFFTLaplace(
+	interpolationF<complexv>& source,
+	storage<complexv>& interval)
+{
+      constants cst;
+
+      double cshift = interval.data1D[0].real();
+	    double omegad = interval.data1D[1].imag() - interval.data1D[0].imag();
+	    int nump = interval.GetSize();
+			int nump2=nump/2;
+			double deltat = cst.pi2/(nump*omegad);
+			double wholeT = nump*deltat;
+
+	    interpolationF<complexv> result(source);
+	    complexv* src = source.DirectAccessD();
+	    complexv* res = result.DirectAccessD();
+	    executeN(res,src, nump);
+			for(int ind=0;ind<nump2;ind++) res[ind] *= exp(cshift*ind*deltat) / wholeT;
+	    result.UpdateAxis(0,deltat);
+	    return result;
+}
+
+storage<complexv>  toolsFFT::prepareFFTLaplace(int np, double deltat, double c_const)
+{
+	nump = np;
+	int nump2 = nump/2;
+
+	constants cst;
+
+	double deltas = cst.pi2/(deltat*nump);
+
+
+		storage<complexv> retval(1);
+		retval.Allocate(np);
+		for(int ind=0;ind<nump2;ind++)
+			retval.data1D[ind]=c_const+coni*(ind*deltas);
+		for(int ind=nump2;ind<nump;ind++)
+			retval.data1D[ind]=c_const+coni*((ind-nump)*deltas);
+
+		return retval;
+}
+
+
 
 void toolsFFT::prepareFFTSpace(int np)
 {
 	nump = np;
     dimension = 1;
-    
+
     // onedimenional transforms
     FFTdatI = (fftw_complex*)fftw_malloc(nump*sizeof(fftw_complex));
     FFTdatO = (fftw_complex*)fftw_malloc(nump*sizeof(fftw_complex));
@@ -40,7 +83,7 @@ void toolsFFT::prepareFFTSpace(int in1, int in2)
 	nump = in1;
     nump2 = in2;
     dimension = 2;
-    
+
     // preparing for 2D Fourier transforms
     FFTdatI = (fftw_complex*)fftw_malloc(in1*in2*sizeof(fftw_complex));
     FFTdatO = (fftw_complex*)fftw_malloc(in1*in2*sizeof(fftw_complex));
@@ -56,7 +99,7 @@ void toolsFFT::cleanFFTSpace()
     nump2 = 0;
     locked = 0;
     dimension = 0;
-    fftw_free(FFTdatI); 
+    fftw_free(FFTdatI);
     fftw_free(FFTdatO);
     fftw_destroy_plan(fplanP);
     fftw_destroy_plan(fplanN);
@@ -79,7 +122,7 @@ void toolsFFT::executeP(complexv* result,complexv* source, int np)
 		// preparations
 		prepareFFTSpace(np);
         // now it is prepared
-    
+
 	if( nump == np) // OK proceeding
 	{
 		// copying data
@@ -87,7 +130,7 @@ void toolsFFT::executeP(complexv* result,complexv* source, int np)
 		{
 			FFTdatI[in][0]=source[in].real();
 			FFTdatI[in][1]=source[in].imag();
-                        
+
                         //cout<<FFTdatI[in][0]<<" fft I\n";
                         //cout<<FFTdatI[in][1]<<" fft I\n";
 		}
@@ -111,12 +154,12 @@ void toolsFFT::executeP(complexv** result,complexv** source, int in1, int in2)
 //function for 2D requested
 {
 	int selection = 1; // forward transform requested
-    
+
 	if(locked  == 0)
 		// preparations
 		prepareFFTSpace(in1,in2);
         // now it is prepared
-    
+
 	if( nump == in1 && nump2 == in2) // OK proceeding
 	{
 		// copying data
@@ -127,7 +170,7 @@ void toolsFFT::executeP(complexv** result,complexv** source, int in1, int in2)
 			FFTdatI[in1*nump2+in2][1]=source[in1][in2].imag();
 		}
 		fftw_execute(fplanP);
-        
+
 		// saving the calculated result
 		for(int in1 = 0; in1 <nump; in1 ++)
             for(int in2 = 0; in2 <nump2; in2 ++)
@@ -145,12 +188,12 @@ void toolsFFT::executeN(complexv* result,complexv* source, int np)
 //function for 1D requested
 {
 	int selection = 0; // back transform requested
-    
+
 	if(locked  == 0)
 		// preparations
 		prepareFFTSpace(np);
     // now it is prepared
-    
+
 	if( nump == np) // OK proceeding
 	{
 		// copying data
@@ -160,7 +203,7 @@ void toolsFFT::executeN(complexv* result,complexv* source, int np)
 			FFTdatI[in][1]=source[in].imag();
 		}
 		fftw_execute(fplanN);
-        
+
 		// saving the calculated result
 		for(int indt = 0; indt < nump; indt ++)
 			result[indt] = complexv( FFTdatO[indt][0], FFTdatO[indt][1] );
@@ -176,12 +219,12 @@ void toolsFFT::executeN(complexv** result,complexv** source, int in1, int in2)
 //function for 2D requested
 {
 	int selection = 0; // forward transform requested
-    
+
 	if(locked  == 0)
 		// preparations
 		prepareFFTSpace(in1,in2);
     // now it is prepared
-    
+
 	if( nump == in1 && nump2 == in2) // OK proceeding
 	{
 		// copying data
@@ -192,7 +235,7 @@ void toolsFFT::executeN(complexv** result,complexv** source, int in1, int in2)
                 FFTdatI[in1*nump2+in2][1]=source[in1][in2].imag();
             }
 		fftw_execute(fplanN);
-        
+
 		// saving the calculated result
 		for(int in1 = 0; in1 <nump; in1 ++)
             for(int in2 = 0; in2 <nump2; in2 ++)
@@ -276,7 +319,7 @@ interpolationF2d<complexv> toolsFFT::executeP(interpolationF2d<complexv>& source
     double omdy = source.GetYF();
     int omnx = source.GetNx();
     int omny = source.GetNy();
-    
+
     omdx = cst.pi2/omdx;
     omdy = cst.pi2/omdy;
     interpolationF2d<complexv> result(source);
@@ -296,7 +339,7 @@ interpolationF2d<complexv> toolsFFT::executeN(interpolationF2d<complexv>& source
     double omdy = source.GetYF();
     int omnx = source.GetNx();
     int omny = source.GetNy();
-    
+
     omdx = cst.pi2/omdx;
     omdy = cst.pi2/omdy;
     interpolationF2d<complexv> result(source);
@@ -314,7 +357,7 @@ void toolsFFT::SwapSides(interpolationF2d<complexv>& funct)
     int numy = funct.GetNy();
     int nu2x = numx/2;
     int nu2y = numy/2;
-    
+
     storage<complexv> sres(2);
     sres.Allocate(numx,numy);
     complexv** res = sres.data2D;
@@ -344,9 +387,9 @@ void toolsFFT::SwapSides(interpolationF2d<complexv>& funct)
                 src[inx-nu2x][iny] = res[inx][iny];
         }
     }
-    
+
     sres.Delete();
-    
+
     double maxx = funct.GetXF();
     double minx = funct.GetXI();
     double stx = (maxx-minx)/numx;

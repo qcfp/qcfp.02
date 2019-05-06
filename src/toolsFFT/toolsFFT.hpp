@@ -10,29 +10,36 @@
 class toolsFFT
 {
 
-public: 
+public:
     toolsFFT();
 	~toolsFFT();
-    
-    
+
+
     // one dimensional Fourier transforms
 	void executeP(complexv* result,complexv* source,int);
 	void executeN(complexv* result,complexv* source,int);
 	interpolationF<complexv> executeP(interpolationF<complexv>& source);
 	interpolationF<complexv> executeN(interpolationF<complexv>& source);
-    
-    
+
+
     // two dimensional Fourier transforms
 	void executeP(complexv** result,complexv** source,int,int);
 	void executeN(complexv** result,complexv** source,int,int);
 	interpolationF2d<complexv> executeP(interpolationF2d<complexv>& source);
 	interpolationF2d<complexv> executeN(interpolationF2d<complexv>& source);
-        
-        
+
+	  // inverse Laplace method
+		storage<complexv>  prepareFFTLaplace
+			(int np, double deltat, double c_const);
+		interpolationF<complexv>  inverseFFTLaplace(
+			interpolationF<complexv>& source,
+			storage<complexv>& interval);
+
+
         void SwapSides(interpolationF<complexv>& asymresFFTf);
         void SwapSides(interpolationF2d<complexv>& asymresFFTf);
-    
-    
+
+
     void cleanFFTSpace();
 
 
@@ -42,8 +49,8 @@ private:
  int locked;
  int dimension;
  void executeGen(int& selection);
-    
-    
+
+
  fftw_complex* FFTdatI;
  fftw_complex* FFTdatO;
  fftw_plan fplanP;
