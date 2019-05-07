@@ -38,6 +38,8 @@ propagatorExciton::propagatorExciton(int ig,int ie,int jf)
 	DMMcontinousInternalTimeStep = 1.0;
     DMMcontinousInternalTimeNump = 0.0;
 
+		flagMemoryWithCfun = 0;
+
 }
 
 propagatorExciton::propagatorExciton(communicator_3rd& comm)
@@ -63,6 +65,7 @@ propagatorExciton::propagatorExciton(communicator_3rd& comm)
 
 	DMMcontinous.SetDimension(1);
 
+	flagMemoryWithCfun = 0;
 
     // the comm object must contain all excitonic information
     if(comm.excitonictransformed)
@@ -327,8 +330,8 @@ storage<complexv> propagatorExciton::PropagateDM(storage<double>& times)
 					}
 					superoperatorReady = 1;
 				}
-				// now nonMarkovian
-        else if(flagMemoryWithCfun) // this is always nonsecular
+				// now nonMarkovian explicit correlation only TC2 is done
+        else if(   (flagMemoryWithCfun/1)%2 == 1  ) // this is always nonsecular
 				{ // this is  memory relaxation kernel
 					// factorized into amplitudes (kernel)
 					// and correlation functions
@@ -387,6 +390,9 @@ storage<complexv> propagatorExciton::PropagateDM(storage<double>& times)
 				}
 				else
 				{
+
+					approachTC = (flagMemoryWithCfun/10)%2;
+
 					// this is full memory relaxation kernel as a function of time
 					cout<<"Preparing complete non-Markovian relaxation tensor\n";
       		int numT=0;
@@ -662,7 +668,7 @@ void propagatorExciton::ConvoluteGen(
     storage<complexv>& der  // current derivative values
 )
 {
-    if(flagMemoryWithCfun)
+	  if(   (flagMemoryWithCfun/1)%2 == 1  ) // this is always nonsecular
         ConvoluteCfun(der);
     else
         Convolute(der);  // original approach in propagatorMemory
@@ -782,7 +788,7 @@ storage<complexv> propagatorExciton::Propagate(storage<double>& times)
     int numT,dimension;
     DMM->GetSize(numT,dimension);
 
-	if(flagMemoryWithCfun)
+		if(   (flagMemoryWithCfun/1)%2 == 1  ) // this is always nonsecular
 	// create continous representation of DMM
 	// with time starting from zero and going upwards
 	{

@@ -30,6 +30,9 @@ propagatorMemory::propagatorMemory()
     manifold1End=1e99;
     manifold2End=1e99;
     internaltimeN =0;
+
+
+    approachTC = 1;
 }
 
 propagatorMemory::~propagatorMemory()
@@ -117,6 +120,18 @@ void propagatorMemory::Convolute(
     storage<complexv>& der  //  derivative values
 )
 {
+    if(approachTC==0) ConvoluteTC2(der);
+    if(approachTC==1) ConvoluteTCL2(der);
+    else{
+        cout<<"Error: propagatorMemory::Convolute() Approach is incorrect\n";
+    }
+}
+
+
+void propagatorMemory::ConvoluteTC2(
+    storage<complexv>& der  //  derivative values
+)
+{
     // this function works with the physical correlation function
     double timestep = timesinternal.data1D[0]-timesinternal.data1D[1];
     int timeN = timesinternal.GetSize();
@@ -180,6 +195,81 @@ void propagatorMemory::Convolute(
                     derdata1Dindl += kernel->data3D[indt][indl][indr]
                         *exp(coni*(omegalxtimel-omega*interval))
                         *DMM->data2D[indt][indr]*timestep;
+                }
+            }
+            else break;
+
+        }
+    }
+}
+
+void propagatorMemory::ConvoluteTCL2(
+    storage<complexv>& der  //  derivative values
+)
+{
+    // this function works with the physical correlation function
+    double timestep = timesinternal.data1D[0]-timesinternal.data1D[1];
+    int timeN = timesinternal.GetSize();
+    double timeini = timesinternal.data1D[0];
+    int dimension = der.GetSize();
+    //cout<<"timestep= "<<timestep<<"\n";
+
+    // integration
+    for(int indl=0;indl<dimension; indl++)
+    {
+        double omegalxtimel = omegas_memory.data1D[indl]*timeini;
+        complexv& derdata1Dindl = der.data1D[indl];
+        derdata1Dindl=0.0;
+
+        //    cout<<"call with timeini = "<<timeini<<"\n";
+
+
+        // integration by trapezoid
+
+        // indt=0
+        if(true)
+        {
+            int indt=0;
+
+            //double time = 0;
+            double interval = timeini;
+
+            // convoluting in the same manifold
+
+            //if(interval+(1e-16) > manifold0End)// here one must include the small parameter
+            if(interval-constants::smallepsilon > manifold0End)// here one must include the small parameter
+            {
+                // the present time
+                for(int indr=0;indr<dimension; indr++)
+                {
+                    double omega = omegas_reorganizations_memory.data1D[indr];
+                    derdata1Dindl += 0.5*kernel->data3D[0][indl][indr]
+                        *exp(coni*(omegalxtimel-omega*interval))
+                        *DMM->data2D[0][indr]*timestep;
+                }
+            }
+        }
+
+
+        for(int indt=1;indt<timeN; indt++)
+        {
+            //
+            double time = timestep*indt;
+            double interval = timeini-time;
+
+            //if(true)
+            if(interval-constants::smallepsilon > manifold0End)// here one must include the small parameter
+            {
+                //if(indl==0)
+                //    cout<<"indt = "<<indt<<"\n";
+
+                // the present time
+                for(int indr=0;indr<dimension; indr++)
+                {
+                    double omega = omegas_reorganizations_memory.data1D[indr];
+                    derdata1Dindl += kernel->data3D[indt][indl][indr]
+                        *exp(coni*(omegalxtimel-omega*interval))
+                        *DMM->data2D[0][indr]*timestep;
                 }
             }
             else break;

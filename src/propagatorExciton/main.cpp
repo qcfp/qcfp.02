@@ -209,20 +209,6 @@ int main(int argc, const char * argv[])
     reader.MakeESSystem();
     propagatorExciton pE(reader);
 
-    found = keyword.find("NonMarkovian");
-    if(found!=std::string::npos){
-	pE.flagMarkovian=0;
-	pE.flagMemoryWithCfun=0;
-	pE.flagNonsecular=1;
-    }
-
-    found = keyword.find("NonMarkovianCFun");
-    if(found!=std::string::npos){
-    pE.flagMarkovian=0;
-	pE.flagMemoryWithCfun=1;
-	pE.flagNonsecular=1;
-    }
-
     found = keyword.find("NonSecular");
     if(found!=std::string::npos){
 	pE.flagNonsecular=1;
@@ -244,6 +230,27 @@ int main(int argc, const char * argv[])
 	pE.flagNonsecular=0;
 	pE.calcR->flagLindblad = 0;
     //pE.calcR->nonsecular=0
+    }
+
+		found = keyword.find("NonMarkovian");
+    if(found!=std::string::npos){
+			pE.flagMarkovian=0;
+			pE.flagMemoryWithCfun=0;
+			pE.flagNonsecular=1;
+    }
+		found = keyword.find("NonMarkovianCFun");
+		if(found!=std::string::npos){
+			pE.flagMarkovian=0;
+			pE.flagMemoryWithCfun=1;
+			pE.flagNonsecular=1;
+    }
+		found = keyword.find("TC2");
+    if(found!=std::string::npos){
+			pE.flagMemoryWithCfun = 0+pE.flagMemoryWithCfun;
+    }
+		found = keyword.find("TCL2");
+    if(found!=std::string::npos){
+			pE.flagMemoryWithCfun = 10+pE.flagMemoryWithCfun;
     }
 
      // setting initial condition

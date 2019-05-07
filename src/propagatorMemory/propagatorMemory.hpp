@@ -58,6 +58,8 @@ public:
 
     // this function calculates derivatives when kernel is given
     void Convolute(storage<complexv>& der);
+		void ConvoluteTC2(storage<complexv>& der);
+		void ConvoluteTCL2(storage<complexv>& der);
 
     // this function makes the next step when derivatives are given
     storage<complexv> Propagate(storage<double>& times);
@@ -78,6 +80,14 @@ public:
     storage<double> timesinternal;
     double internaltimeS;
     int internaltimeN;
+
+		int approachTC;
+		// this is the method o. propagation either
+		// time convolution 1
+		// or local time convolutionless 2
+
+
+
     // block 0:
     // kernel
     storage<complexv>* kernel;
@@ -88,6 +98,7 @@ public:
 
     //history matrix 1
     storage<complexv>* DMM;
+
 
     // notice that blocks are not used with cfun.... not clear if they make any use
 

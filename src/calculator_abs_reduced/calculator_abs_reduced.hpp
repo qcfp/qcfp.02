@@ -116,7 +116,10 @@ calculator_abs_reduced<Type>::calculator_abs_reduced(string& ifname)
 
     found = experiment_complexity.find("Markovian");
     if(found!=std::string::npos)
-	markovian=1;
+
+
+
+		markovian=1;
     found = experiment_complexity.find("NonMarkovian");
     if(found!=std::string::npos)
 		{
@@ -131,6 +134,22 @@ calculator_abs_reduced<Type>::calculator_abs_reduced(string& ifname)
 			flagMemoryWithCfun=1;
 			nonsecular=1;
 		}
+		found = experiment_complexity.find("TC2");
+    if(found!=std::string::npos){
+			flagMemoryWithCfun = 0+flagMemoryWithCfun;
+    }
+		found = experiment_complexity.find("TCL2");
+    if(found!=std::string::npos){
+			flagMemoryWithCfun = 10+flagMemoryWithCfun;
+    }
+
+
+
+
+
+
+
+
     found = experiment_complexity.find("Lindblad");
     if(found!=std::string::npos)
 		{
